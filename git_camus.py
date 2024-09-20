@@ -47,9 +47,10 @@ def main():
     token = os.environ.get("GITHUB_COPILOT_TOKEN")
     diff_output = git_diff_output()
     response = call_copilot_chat_api(token, diff_output)
-    print(f"DEBUG {response.json()}")
-    commit_message = response.json().get("choices", [{}])[0].get("text", "").strip()
-    print(commit_message)
+    # print(f"DEBUG {response.json()}")
+    # commit_message = response.json().get("choices", [{}])[0].get("text", "").strip()
+    # print(commit_message)
+    print(response)
 
 
 # Example usage
