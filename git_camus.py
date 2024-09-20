@@ -25,16 +25,22 @@ def generate_commit_message():
 
 def call_copilot_chat_api(token, input_msg):
     """Call the GitHub Copilot Chat API"""
-    response = requests.post(
-        "https://api.github.com/copilot-chat",
-        headers={
-            "Authorization": f"Bearer {token}",
-            "Content-Type": "application/json",
-        },
-        json=input_msg,
-    )
-    return response
-
+    try:
+        response = requests.post(
+            "https://api.github.com/copilot-chat",
+            headers={
+                "Authorization": f"Bearer {token}",
+                "Content-Type": "application/json",
+            },
+            json=input_msg,
+        )
+        response.raise_for_status()  # Raise an HTTPError for bad responses (4xx and 5xx)
+        return response.json()  # Return the JSON response
+    except requests.exceptions.HTTPError as http_err:
+        print(f"HTTP error occurred: {http_err}")  # Print the HTTP error
+    except Exception as err:
+        print(f"An error occurred: {err}")  # Print any other error
+    return None  # Return None if an error occurred
 
 def main():
     """_summary_"""
