@@ -10,7 +10,7 @@ _git-camus_
 ## GIT COMMANDS
 
 _git-camus_
-Wraps the git commit command and generates a unique commit message  
+Wraps the ```git commit``` command and generates a unique commit message  
 
 ## Main Features
 
