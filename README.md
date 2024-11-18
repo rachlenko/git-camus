@@ -1,6 +1,6 @@
 ## Git-camus
+**git-Camus:** Craft Git Commit Messages with Existential Flair and Boost Your Self-Review Game—Start Reading Git Logs Like a Pro!
 
-**git-camus**: Craft Git Commit Messages with Existential Flair
 ## SYNOPSIS
 
 _git camus_ 
