@@ -3,7 +3,7 @@
 
 ## SYNOPSIS
 
-_git camus_  Boost Your Self-Review Game—Start Reading Git Logs Like a Pro!
+_git camus_  
 ## DESCRIPTION
 
 **git-camus** is a tool that transforms your Git commit messages into philosophical reflections inspired by the works of [**Albert Camus**.](https://en.wikipedia.org/wiki/Albert_Camus) Instead of mundane messages, each commit becomes a thoughtful meditation on absurdity, rebellion, and the human condition. Ideal for developers who wish to bring a deeper existential meaning to their codebase, **git-camus** turns the ordinary act of version control into an exploration of life's paradoxes.
@@ -24,3 +24,5 @@ Record changes to the repository
    - A comment usually answers two key questions:
      1. **What has changed?**
      2. **Why were these changes made?**
+        
+4. **Boost Your Self-Review Game—Start Reading Git Logs Like a Pro!**
