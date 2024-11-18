@@ -11,3 +11,16 @@ _git camus_
 
 _git camus_
 Record changes to the repository
+
+## Main Features
+
+1. **Subject Length Validation**
+   - Validates that the subject string has no more than 72 characters.
+
+2. **Second Line Must Be Empty**
+   - Ensures the second line in the input is empty.
+
+3. **Comment Guidelines**
+   - A comment usually answers two key questions:
+     1. **What has changed?**
+     2. **Why were these changes made?**
