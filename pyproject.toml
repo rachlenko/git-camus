@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "git-camus"
+version = "0.1.0"
+description = "Craft Git Commit Messages with Existential Flair"
+authors = ["Evgeny Rachlenko <evgeny.rachlenko@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
