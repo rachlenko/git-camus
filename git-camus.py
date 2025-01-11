@@ -10,8 +10,11 @@ try:
         model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": "Generate a commit message for the following changes:\n\n<describe changes here>"},
-        ]
+            {
+                "role": "user",
+                "content": "Generate a commit message for the following changes:\n\n<describe changes here>",
+            },
+        ],
     )
     print(completion.choices[0].message.content)
 except OpenAIError as e:
