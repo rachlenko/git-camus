@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-""" A simple script to generate commit messages using GitHub Copilot Chat API"""
+"""A simple script to generate commit messages using GitHub Copilot Chat API"""
 # -*- coding: utf-8 -*-
 
 import os
@@ -41,6 +41,7 @@ def call_copilot_chat_api(token, input_msg):
     except Exception as err:
         print(f"An error occurred: {err}")  # Print any other error
     return None  # Return None if an error occurred
+
 
 def main():
     """_summary_"""
