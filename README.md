@@ -30,3 +30,4 @@ Wraps the ```git commit``` command and generates a unique commit message
      2. **Why were these changes made?**
         
 4. **Boost Your Self-Review Game—Start Reading Git Logs Like a Pro!**
+   
