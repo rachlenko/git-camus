@@ -1,6 +1,6 @@
 ## Git-camus
-**git-Camus:** Craft Git Commit Messages with Existential Flair 
 [![.github/workflows/python-package.yml](https://github.com/rachlenko/git-camus/actions/workflows/python-package.yml/badge.svg)](https://github.com/rachlenko/git-camus/actions/workflows/python-package.yml)
+**git-Camus:** Craft Git Commit Messages with Existential Flair 
 
 ## SYNOPSIS
 
