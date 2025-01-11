@@ -10,6 +10,7 @@ readme = "README.md"
 python = "^3.12"
 requests = "^2.32.3"
 click = "^8.1.8"
+types-requests = "^2.32.0.20241016"
 
 [project.urls]
 Homepage = "https://github.com/rachlenko/git-camus"
@@ -38,6 +39,7 @@ pytest-xdist = "^3.6.1"
 pre-commit = "^4.0.1"
 ansible = "^11.1.0"
 poethepoet = "^0.32.1"
+icecream = "^2.1.4"
 
 [build-system]
 requires = ["poetry-core"]

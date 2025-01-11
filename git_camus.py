@@ -4,32 +4,37 @@
 
 import os
 import subprocess
+from typing import Optional, Dict
+
 import requests
 import click
 import sys
 
 
-def git_diff_output():
+
+
+def git_diff_output() -> str:
     """Run `git diff` and capture the output"""
     return subprocess.check_output(["git", "status", "-s"], text=True)
 
 
-def generate_commit_message():
+def generate_commit_message()-> dict[str, str | int]:
     """Format the `git diff` output as input for the
     GitHub Copilot Chat API
     """
     return {
-        "prompt": f"""read following files and generate 
+        "prompt": f"""read following files and generate
          commit message:\n {git_diff_output()}""",
         "max_tokens": 50,
     }
 
 
-def call_copilot_chat_api(token, input_msg):
+def call_copilot_chat_api(token , input_msg):
     """Call the GitHub Copilot Chat API"""
+    response: dict[Optional, Optional] = {}
     try:
         response = requests.post(
-            "https://api.github.com/copilot-chat",
+            'https://api.github.com/copilot-chat',
             headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
             json=input_msg,
         )
@@ -39,10 +44,10 @@ def call_copilot_chat_api(token, input_msg):
         print(f"HTTP error occurred: {http_err}")  # Print the HTTP error
     except Exception as err:
         print(f"An error occurred: {err}")  # Print any other error
-    return None  # Return None if an error occurred
+    return  response # Return None if an error occurred
 
 
-def main():
+def main() -> None:
     """_summary_"""
     click.command()
     click.option("--token", required=True, help="GitHub Copilot token")
@@ -61,8 +66,8 @@ def main():
                 f"""
             # save following lines into git-camus.bat file and run it
             # or define the environment variables in your shell profile
-            
-            set GITHUB_COPILOT_TOKEN="{token}" 
+
+            set GITHUB_COPILOT_TOKEN="{token}"
             set PYTHONIOENCODING="utf-8"
             python3 git_camus.py %*
             """
@@ -73,8 +78,8 @@ def main():
                 f"""
             # save following lines into git-camus.sh file and run it
             # or define the environment variables in your shell profile
-            
-            export GITHUB_COPILOT_TOKEN="{token}" 
+
+            export GITHUB_COPILOT_TOKEN="{token}"
             export PYTHONIOENCODING="utf-8"
             python3 git_camus.py $@
             """
@@ -91,4 +96,8 @@ def main():
 
 # Example usage
 if __name__ == "__main__":
-    main()
+    test = generate_commit_message()
+    print(dir(test))
+
+
+    #main()
