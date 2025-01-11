@@ -37,14 +37,17 @@ pytest-cov = "^6.0.0"
 pytest-xdist = "^3.6.1"
 pre-commit = "^4.0.1"
 ansible = "^11.1.0"
+poethepoet = "^0.32.1"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
-#run git-camus
 [ tool.poetry.scripts ]
 git-camus = "git_camus:main"
+
+
+
 
 #poetry run mypy --strict .\git-camus.py
 mypy = "mypy.__main__:console_entry"
@@ -186,3 +189,15 @@ exclude_lines = [
   '''^if __name__ == ['"]__main__['"]:$''',
 ]
 
+ [tool.poe]
+ envfile = ".env"
+
+
+#poetry run poe [OPTION]
+#example: poetry run poe check
+[tool.poe.tasks]
+type-check.shell = "poetry run mypy --strict git_camus.py"
+pytest-cov.shell = "poetry run pytest --cov=git-camus --cov-report=term-missing"
+format.shell = "black ."
+doc-build.shell = "poetry run sphinx-build -b html docs/source docs/build"
+report.shell = "make report"
