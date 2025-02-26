@@ -1,103 +1,197 @@
 #!/usr/bin/env python3
-"""A simple script to generate commit messages using GitHub Copilot Chat API"""
-# -*- coding: utf-8 -*-
+"""
+Git-Camus: Craft Git Commit Messages with Existential Flair.
+
+This tool transforms mundane git commit messages into philosophical reflections
+inspired by the works of Albert Camus.
+"""
 
 import os
 import subprocess
-from typing import Optional, Dict
-
-import requests
-import click
 import sys
+from typing import Dict, List, Optional, Union, TypedDict, Any
+
+import click
+import httpx
 
 
+class AnthropicMessage(TypedDict):
+    """Type for a Claude API message."""
+    role: str
+    content: str
 
 
-def git_diff_output() -> str:
-    """Run `git diff` and capture the output"""
-    return subprocess.check_output(["git", "status", "-s"], text=True)
+class AnthropicRequest(TypedDict):
+    """Type for an Anthropic API request."""
+    model: str
+    max_tokens: int
+    messages: List[AnthropicMessage]
+    temperature: float
 
 
-def generate_commit_message()-> dict[str, str | int]:
-    """Format the `git diff` output as input for the
-    GitHub Copilot Chat API
+def get_git_diff() -> str:
+    """Run `git diff --staged` to get the changes to be committed.
+    
+    Returns:
+        str: The output of git diff showing pending changes.
     """
-    return {
-        "prompt": f"""read following files and generate
-         commit message:\n {git_diff_output()}""",
-        "max_tokens": 50,
-    }
-
-
-def call_copilot_chat_api(token , input_msg):
-    """Call the GitHub Copilot Chat API"""
-    response: dict[Optional, Optional] = {}
     try:
-        response = requests.post(
-            'https://api.github.com/copilot-chat',
-            headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
-            json=input_msg,
+        return subprocess.check_output(
+            ["git", "diff", "--staged"], 
+            text=True
         )
-        response.raise_for_status()  # Raise an HTTPError for bad responses (4xx and 5xx)
-        return response.json()  # Return the JSON response
-    except requests.exceptions.HTTPError as http_err:
-        print(f"HTTP error occurred: {http_err}")  # Print the HTTP error
-    except Exception as err:
-        print(f"An error occurred: {err}")  # Print any other error
-    return  response # Return None if an error occurred
+    except subprocess.CalledProcessError as e:
+        click.echo(f"Error getting git diff: {e}", err=True)
+        sys.exit(1)
 
 
-def main() -> None:
-    """_summary_"""
-    click.command()
-    click.option("--token", required=True, help="GitHub Copilot token")
-    click.option("--diff", required=True, help="Git diff output")
-    click.option("--setup", help="Setup GitHub Copilot token")
-    click.option("--version", help="Print version")
-    click.option("--help", help="Print help")
+def get_git_status() -> str:
+    """Run `git status` to get the repository status.
+    
+    Returns:
+        str: The output of git status.
+    """
+    try:
+        return subprocess.check_output(
+            ["git", "status", "-s"], 
+            text=True
+        )
+    except subprocess.CalledProcessError as e:
+        click.echo(f"Error getting git status: {e}", err=True)
+        sys.exit(1)
 
-    if os.environ.get("GITHUB_COPILOT_TOKEN"):
-        token = os.environ.get("GITHUB_COPILOT_TOKEN")
+
+def generate_commit_message(diff: str, status: str) -> AnthropicRequest:
+    """Format the git diff and status data for the Anthropic Claude API.
+    
+    Args:
+        diff: The output from git diff --staged
+        status: The output from git status -s
+        
+    Returns:
+        AnthropicRequest: Request object for the Anthropic API
+    """
+    # Truncate diff if it's too large to avoid e
+
+
+def call_anthropic_api(request_data: AnthropicRequest) -> Dict[str, Any]:
+    """Call the Anthropic Claude API to generate a commit message.
+    
+    Args:
+        request_data: Request data for the Anthropic API
+        
+    Returns:
+        Dict[str, Any]: The API response
+        
+    Raises:
+        SystemExit: If the API call fails
+    """
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    if not api_key:
+        click.echo("Error: ANTHROPIC_API_KEY environment variable is not set", err=True)
+        sys.exit(1)
+    
+    try:
+        # Debug information
+        click.echo("Sending request to Anthropic API...", err=True)
+        
+        response = httpx.post(
+            "https://api.anthropic.com/v1/messages",
+            headers={
+                "x-api-key": api_key,
+                "anthropic-version": "2023-06-01",
+                "content-type": "application/json"
+            },
+            json=request_data,
+            timeout=30.0
+        )
+        
+        # If we get an error, let's print more details
+        if response.status_code != 200:
+            click.echo(f"API error status: {response.status_code}", err=True)
+            click.echo(f"Response body: {response.text}", err=True)
+            
+        response.raise_for_status()
+        return response.json()
+    except httpx.HTTPError as e:
+        click.echo(f"API error: {e}", err=True)
+        sys.exit(1)
+
+
+def perform_git_commit(message: str) -> None:
+    """Execute git commit with the provided message.
+    
+    Args:
+        message: The commit message to use
+    """
+    try:
+        subprocess.run(
+            ["git", "commit", "-m", message],
+            check=True,
+            text=True
+        )
+        click.echo(f"Committed with message: {message}")
+    except subprocess.CalledProcessError as e:
+        click.echo(f"Error committing changes: {e}", err=True)
+        sys.exit(1)
+
+
+@click.command()
+@click.option("--show", "-s", is_flag=True, help="Show the generated message without committing")
+@click.option(
+    "--message", "-m", help="Original commit message to enhance with Camus-style existentialism"
+)
+def main(show: bool, message: Optional[str]) -> None:
+    """Generate an existential commit message in the style of Albert Camus.
+    
+    If --show is specified, the message is displayed but not committed.
+    If --message is provided, it will be used as context for generating the message.
+    """
+    # Check if we're in a git repository
+    try:
+        subprocess.run(
+            ["git", "rev-parse", "--is-inside-work-tree"],
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+    except subprocess.CalledProcessError:
+        click.echo("Error: Not in a git repository", err=True)
+        sys.exit(1)
+    
+    # Get git status and diff
+    status = get_git_status()
+    diff = get_git_diff()
+    
+    if not status.strip() and not diff.strip():
+        click.echo("No changes to commit", err=True)
+        sys.exit(0)
+    
+    # Prepare API request
+    request_data = generate_commit_message(diff, status)
+    
+    # Add original message context if provided
+    if message:
+        request_data["messages"].append({
+            "role": "user",
+            "content": f"Consider this original message as context: {message}"
+        })
+    
+    # Call the API
+    response = call_anthropic_api(request_data)
+    
+    # Extract and process the commit message
+    commit_message = response.get("content", [{}])[0].get("text", "").strip()
+    
+    if not commit_message:
+        click.echo("Failed to generate a commit message", err=True)
+        sys.exit(1)
+    
+    if show:
+        click.echo(commit_message)
     else:
-        token = click.prompt("Enter your GitHub Copilot token")
-        # if os is windows
-        if "nt" in os.name:
-            print(
-                f"""
-            # save following lines into git-camus.bat file and run it
-            # or define the environment variables in your shell profile
-
-            set GITHUB_COPILOT_TOKEN="{token}"
-            set PYTHONIOENCODING="utf-8"
-            python3 git_camus.py %*
-            """
-            )
-            sys.exit(0)
-        else:
-            print(
-                f"""
-            # save following lines into git-camus.sh file and run it
-            # or define the environment variables in your shell profile
-
-            export GITHUB_COPILOT_TOKEN="{token}"
-            export PYTHONIOENCODING="utf-8"
-            python3 git_camus.py $@
-            """
-            )
-            sys.exit(0)
-
-    diff_output = git_diff_output()
-    response = call_copilot_chat_api(token, diff_output)
-    # print(f"DEBUG {response.json()}")
-    # commit_message = response.json().get("choices", [{}])[0].get("text", "").strip()
-    # print(commit_message)
-    print(response)
+        perform_git_commit(commit_message)
 
 
-# Example usage
 if __name__ == "__main__":
-    test = generate_commit_message()
-    print(dir(test))
-
-
-    #main()
+    main()
