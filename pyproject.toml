@@ -1,16 +1,31 @@
-[tool.poetry]
+[project]
 name = "git-camus"
 version = "0.1.0"
-description = "Craft Git Commit Messages with Existential Flair"
-authors = ["Evgeny Rachlenko <evgeny.rachlenko@gmail.com>"]
-license = "MIT"
+description = ""
+authors = [
+    {name = "Evgeny Rachlenko",email = "evgeny.rachlenko@gmail.com"}
+]
+license = {text = "MIT"}
 readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi (>=0.115.10,<0.116.0)",
+    "uvicorn (>=0.34.0,<0.35.0)",
+    "sqlalchemy[asyncio] (>=2.0.38,<3.0.0)"
+]
 
 [tool.poetry.dependencies]
 python = "^3.12"
 requests = "^2.32.3"
 click = "^8.1.8"
 types-requests = "^2.32.0.20241016"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+package-mode = false
 
 [project.urls]
 Homepage = "https://github.com/rachlenko/git-camus"
@@ -53,15 +68,8 @@ idna = "^3.10"
 pygments = "^2.19.1"
 urllib3 = "^2.3.0"
 
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
-
-[ tool.poetry.scripts ]
+[ project.scripts] 
 git-camus = "git_camus:main"
-
-
-
 
 #poetry run mypy --strict .\git-camus.py
 mypy = "mypy.__main__:console_entry"
