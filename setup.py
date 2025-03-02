@@ -29,13 +29,6 @@ setuptools.setup(
         "Programming Language :: Python :: 3.12",
     ],
     python_requires=">=3.9",
-    install_requires=[
-        "click>=8.0.0",
-        "httpx>=0.24.0",
-    ],
-    entry_points={
-        "console_scripts": [
-            "git-camus=git_camus:main",
-        ],
-    },
+    install_requires=["click>=8.0.0", "httpx>=0.24.0"],
+    entry_points={"console_scripts": ["git-camus=git_camus:main"]},
 )
