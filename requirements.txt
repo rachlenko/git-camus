@@ -60,7 +60,7 @@ mypy-extensions==1.0.0
 myst-parser==4.0.1
 nodeenv==1.9.1
 Nuitka==2.6.7
-openai==1.57.4
+openai==1.65.3
 ordered-set==4.1.0
 packaging==24.2
 pastel==0.2.1
