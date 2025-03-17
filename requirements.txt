@@ -2,7 +2,7 @@ alabaster==1.0.0
 annotated-types==0.7.0
 ansible==11.3.0
 ansible-core==2.18.3
-anyio==4.8.0
+anyio==4.9.0
 asttokens==3.0.0
 asyncpg==0.30.0
 attrs==24.3.0
