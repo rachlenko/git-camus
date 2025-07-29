@@ -95,7 +95,36 @@ cd git-camus
 pip install -e ".[dev]"
 ```
 
+## 🐳 Docker
+
+You can build and run Git-Camus in a Docker container:
+
+```bash
+# Build the Docker image
+sudo docker build -t git-camus .
+
+# Run with Ollama model (default: llama3:70b)
+sudo docker run --rm -it \
+  -v $(pwd):/repo \
+  -e OLLAMA_MODEL=llama3:70b \
+  git-camus
+```
+
+You can also mount a custom config file:
+
+```bash
+sudo docker run --rm -it \
+  -v $(pwd):/repo \
+  -v $(pwd)/your_config.toml:/app/config.toml \
+  git-camus
+```
+
 ## ⚙️ Configuration
+
+You can configure the Ollama model name in two ways:
+
+1. **Environment variable**: `OLLAMA_MODEL` (takes precedence)
+2. **Config file**: Edit `core/config.py` or provide a compatible config file with a `model_name` field under `[run]`.
 
 ### Environment Variables
 

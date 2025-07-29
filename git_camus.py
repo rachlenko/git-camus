@@ -74,25 +74,22 @@ def generate_commit_message(diff: str, status: str) -> OllamaRequest:
     if len(diff) > max_diff_length:
         diff = diff[:max_diff_length] + "\n... (truncated)"
 
-    prompt = f"""You are an AI assistant that generates philosophical commit messages in the style of Albert Camus.
-Your task is to analyze git changes and create a commit message that reflects on the absurdity, rebellion, and human condition.
+    # Import config dynamically to avoid circular import
+    try:
+        from core.config import settings
+        model_name = settings.run.model_name
+        prompt_message = settings.run.prompt_message
+    except Exception:
+        model_name = None
+        prompt_message = None
 
-Git Diff:
-{diff}
+    model = os.environ.get("OLLAMA_MODEL", model_name or "llama3:70b")
 
-Git Status:
-{status}
-
-Generate a philosophical commit message that:
-1. Reflects on the nature of the changes made
-2. Incorporates themes of existentialism and the absurd
-3. Is concise but meaningful (max 150 characters)
-4. Avoids technical jargon in favor of philosophical reflection
-
-Respond with only the commit message, no explanations or additional text."""
+    prompt = (prompt_message or "You are an AI assistant that generates philosophical commit messages in the style of Albert Camus.\nYour task is to analyze git changes and create a commit message that reflects on the absurdity, rebellion, and human condition.\n\nGit Diff:\n{diff}\n\nGit Status:\n{status}\n\nGenerate a philosophical commit message that:\n1. Reflects on the nature of the changes made\n2. Incorporates themes of existentialism and the absurd\n3. Is concise but meaningful (max 150 characters)\n4. Avoids technical jargon in favor of philosophical reflection\n\nRespond with only the commit message, no explanations or additional text.")
+    prompt = prompt.format(diff=diff, status=status)
 
     return {
-        "model": os.environ.get("OLLAMA_MODEL", "llama3:70b"),
+        "model": model,
         "messages": [{"role": "user", "content": prompt}],
         "stream": False,
         "options": {"temperature": 0.7, "top_p": 0.9, "max_tokens": 150},

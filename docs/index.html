@@ -25,6 +25,12 @@
             font-size: 2.5rem;
             letter-spacing: 1px;
         }
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
         .container {
             max-width: 800px;
             margin: 0 auto;
@@ -54,6 +60,12 @@
         .cta:hover {
             background-color: #555;
         }
+        .hero {
+            padding: 80px 0;
+            text-align: center;
+            background: linear-gradient(135deg, var(--camus-light-blue) 0%, var(--camus-purple) 100%);
+            color: white;
+        }
         footer {
             margin-top: 50px;
             padding: 20px;
@@ -69,10 +81,23 @@
 </head>
 <body>
     <header>
-        <h1>Git-Camus: Commit to the Absurd</h1>
+        <div class="container">
+            <div class="logo-container">
+                <span style="font-size: 3rem;">⁂</span>
+                <h1>git-camus</h1>
+            </div>
+        </div>
     </header>
 
-    <div class="container">
+    <section class="hero">
+        <div class="logo-container">
+            <img src="docs/images/git-camus_logo.jpeg" alt="Git-Camus">
+            <h1>git-camus</h1>
+            <p>Transform your Git commit messages into philosophical reflections inspired by the works of Albert Camus.</p>
+        </div>
+    
+
+        <div class="container">
         <p>Welcome to <strong>Git-Camus</strong>, the utility that transforms your Git commit messages into philosophical reflections inspired by the works of Albert Camus. Why settle for mundane commit messages when you can make each one a profound meditation on absurdity, rebellion, and the human condition?</p>
 
         <p>With <strong>Git-Camus</strong>, the simple act of version control becomes an opportunity to reflect on life's paradoxes, turning every push, pull, and merge into a philosophical journey.</p>
@@ -86,7 +111,36 @@
         <p>Whether you're exploring the absurdity of debugging or the rebellion against technical debt, <strong>Git-Camus</strong> brings meaning to your workflow. Now, each commit is not just a record of changes, but a mark of your existential exploration.</p>
 
         <button class="cta" onclick="window.location.href='https://github.com/your-repo/git-camus';">Get Started on GitHub</button>
-    </div>
+        </div>
+    </section>
+
+    <section class="container">
+        <h2>Quick Start</h2>
+        <h3>Install git-camus</h3>
+        <pre><code>pip install git-camus</code></pre>
+        <h3>Configure Model and Prompt</h3>
+        <p>Create a <code>config.toml</code> file in your project or home directory:</p>
+        <pre><code>[run]
+model_name = "llama3:70b"
+prompt_message = "You are an AI assistant... (customize your prompt here)"
+</code></pre>
+        <h3>Run Locally</h3>
+        <pre><code>git-camus</code></pre>
+        <h3>Run with Docker</h3>
+        <pre><code># Build the Docker image
+ docker build -t git-camus .
+
+# Run with default settings
+ docker run --rm -v $(pwd):/app git-camus
+
+# Run with a custom config file
+ docker run --rm -v $(pwd):/app -v $(pwd)/config.toml:/app/config.toml git-camus
+
+# Override the model via environment variable
+ docker run --rm -v $(pwd):/app -e OLLAMA_MODEL=llama3:8b git-camus
+</code></pre>
+        <p>For more details, see the <a href="https://github.com/your-repo/git-camus">README</a>.</p>
+    </section>
 
     <footer>
         <p>© 2024 Git-Camus. Inspired by Albert Camus, developed for curious developers.</p>
