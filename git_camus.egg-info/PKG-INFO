@@ -1,3 +1,52 @@
+Metadata-Version: 2.4
+Name: git-camus
+Version: 0.2.0
+Summary: Craft Git commit messages with existential flair using local Ollama
+Author-email: Evgeny Rachlenko <evgeny.rachlenko@gmail.com>
+Maintainer-email: Evgeny Rachlenko <evgeny.rachlenko@gmail.com>
+License: MIT
+Project-URL: Homepage, https://github.com/rachlenko/git-camus
+Project-URL: Documentation, https://git-camus.readthedocs.io/
+Project-URL: Repository, https://github.com/rachlenko/git-camus
+Project-URL: Changelog, https://github.com/rachlenko/git-camus/blob/main/CHANGELOG.md
+Project-URL: Issues, https://github.com/rachlenko/git-camus/issues
+Project-URL: Discussions, https://github.com/rachlenko/git-camus/discussions
+Keywords: git,commit,ollama,ai,philosophy,camus,existentialism
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: Software Development :: Version Control :: Git
+Classifier: Topic :: Text Processing :: Linguistic
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: click>=8.0.0
+Requires-Dist: httpx>=0.24.0
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0.0; extra == "dev"
+Requires-Dist: pytest-cov>=4.0.0; extra == "dev"
+Requires-Dist: pytest-xdist>=3.0.0; extra == "dev"
+Requires-Dist: black>=23.0.0; extra == "dev"
+Requires-Dist: ruff>=0.1.0; extra == "dev"
+Requires-Dist: mypy>=1.0.0; extra == "dev"
+Requires-Dist: pre-commit>=3.0.0; extra == "dev"
+Provides-Extra: docs
+Requires-Dist: sphinx>=7.0.0; extra == "docs"
+Requires-Dist: sphinx-rtd-theme>=1.0.0; extra == "docs"
+Requires-Dist: myst-parser>=1.0.0; extra == "docs"
+Provides-Extra: test
+Requires-Dist: pytest>=7.0.0; extra == "test"
+Requires-Dist: pytest-cov>=4.0.0; extra == "test"
+Requires-Dist: pytest-xdist>=3.0.0; extra == "test"
+Dynamic: license-file
+
 # Git-Camus: Craft Git Commit Messages with Existential Flair
 
 [![PyPI version](https://badge.fury.io/py/git-camus.svg)](https://badge.fury.io/py/git-camus)

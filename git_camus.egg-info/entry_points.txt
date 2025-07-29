@@ -1,0 +1,2 @@
+[console_scripts]
+git-camus = git_camus:main

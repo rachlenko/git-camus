@@ -12,9 +12,12 @@ import git_camus
 
 
 @pytest.fixture
-def mock_api_key():
-    """Mock API key environment variable."""
-    with mock.patch.dict(os.environ, {"ANTHROPIC_API_KEY": "test-api-key"}):
+def mock_ollama_env():
+    """Mock Ollama environment variables."""
+    with mock.patch.dict(os.environ, {
+        "OLLAMA_HOST": "http://localhost:11434",
+        "OLLAMA_MODEL": "llama3.2"
+    }):
         yield
 
 
@@ -40,15 +43,15 @@ def mock_git_commands():
 
 
 @pytest.fixture
-def mock_anthropic_api():
-    """Mock Anthropic API responses."""
+def mock_ollama_api():
+    """Mock Ollama API responses."""
     with mock.patch("httpx.post") as mock_post:
         # Create a mock response
         mock_response = mock.MagicMock()
         mock_response.status_code = 200
         mock_response.raise_for_status.return_value = None
         mock_response.json.return_value = {
-            "content": [{"text": "Confront the absurd: Add test function", "type": "text"}]
+            "message": {"content": "Confront the absurd: Add test function", "role": "assistant"}
         }
         mock_post.return_value = mock_response
 
@@ -118,7 +121,7 @@ class TestGitOperations:
 
 
 class TestAPIInteractions:
-    """Tests for Anthropic API interactions."""
+    """Tests for Ollama API interactions."""
 
     def test_generate_commit_message(self):
         """Test commit message request generation."""
@@ -131,76 +134,199 @@ class TestAPIInteractions:
         assert isinstance(request, dict)
         assert "model" in request
         assert "messages" in request
-        assert len(request["messages"]) == 2
-        assert request["messages"][0]["role"] == "system"
-        assert request["messages"][1]["role"] == "user"
-        assert "diff" in request["messages"][1]["content"]
-        assert "status" in request["messages"][1]["content"]
+        assert "stream" in request
+        assert "options" in request
+        assert len(request["messages"]) == 1
+        assert request["messages"][0]["role"] == "user"
+        assert "diff" in request["messages"][0]["content"]
+        assert "Git Status:" in request["messages"][0]["content"]
+        assert request["stream"] is False
+        assert "temperature" in request["options"]
+        assert "max_tokens" in request["options"]
 
-    def test_call_anthropic_api(self, mock_api_key, mock_anthropic_api):
+    def test_call_ollama_api(self, mock_ollama_env, mock_ollama_api):
         """Test successful API call."""
         # Create test request data
         request_data = {
-            "model": "claude-3-5-sonnet-20240620",
+            "model": "llama3.2",
             "messages": [{"role": "user", "content": "Test message"}],
-            "max_tokens": 150,
+            "stream": False,
+            "options": {"temperature": 0.7, "max_tokens": 150}
         }
 
         # Call the function
-        response = git_camus.call_anthropic_api(request_data)
+        response = git_camus.call_ollama_api(request_data)
 
         # Verify API call
-        mock_anthropic_api.assert_called_once()
-        args, kwargs = mock_anthropic_api.call_args
-        assert args[0] == "https://api.anthropic.com/v1/messages"
-        assert kwargs["headers"]["x-api-key"] == "test-api-key"
+        mock_ollama_api.assert_called_once()
+        args, kwargs = mock_ollama_api.call_args
+        assert args[0] == "http://localhost:11434/api/chat"
         assert kwargs["json"] == request_data
 
         # Verify response processing
-        assert "content" in response
-        assert response["content"][0]["text"] == "Confront the absurd: Add test function"
+        assert "message" in response
+        assert response["message"]["content"] == "Confront the absurd: Add test function"
 
-    def test_call_anthropic_api_no_key(self):
-        """Test API call without API key."""
-        with mock.patch.dict(os.environ, {}, clear=True):
-            with pytest.raises(SystemExit):
-                git_camus.call_anthropic_api({})
-
-    def test_call_anthropic_api_error(self, mock_api_key):
-        """Test API call with error response."""
+    def test_call_ollama_api_connection_error(self, mock_ollama_env):
+        """Test API call with connection error."""
         with mock.patch("httpx.post") as mock_post:
-            mock_post.side_effect = httpx.HTTPError("API error")
+            mock_post.side_effect = httpx.ConnectError("Connection failed")
 
             with pytest.raises(SystemExit):
-                git_camus.call_anthropic_api({})
+                git_camus.call_ollama_api({})
+
+    def test_call_ollama_api_http_error(self, mock_ollama_env):
+        """Test API call with HTTP error."""
+        with mock.patch("httpx.post") as mock_post:
+            mock_post.side_effect = httpx.HTTPError("HTTP error")
+
+            with pytest.raises(SystemExit):
+                git_camus.call_ollama_api({})
+
+    def test_call_ollama_api_http_status_error(self, mock_ollama_env):
+        """Test API call with HTTP status error."""
+        with mock.patch("httpx.post") as mock_post:
+            mock_response = mock.MagicMock()
+            mock_response.status_code = 500
+            mock_response.text = "Internal Server Error"
+            mock_response.raise_for_status.side_effect = httpx.HTTPStatusError(
+                "500 Internal Server Error", request=mock.MagicMock(), response=mock_response
+            )
+            mock_post.return_value = mock_response
+
+            with pytest.raises(SystemExit):
+                git_camus.call_ollama_api({})
+
+    def test_call_ollama_api_timeout_error(self, mock_ollama_env):
+        """Test API call with timeout error."""
+        with mock.patch("httpx.post") as mock_post:
+            mock_post.side_effect = httpx.TimeoutException("Request timed out")
+
+            with pytest.raises(SystemExit):
+                git_camus.call_ollama_api({})
+
+    def test_generate_commit_message_with_large_diff(self):
+        """Test commit message generation with large diff that gets truncated."""
+        large_diff = "diff --git a/test.py b/test.py\n" + "+" + "x" * 5000 + "\n"
+        status = "M test.py"
+        
+        request = git_camus.generate_commit_message(large_diff, status)
+        
+        # Verify the diff was truncated
+        content = request["messages"][0]["content"]
+        assert "truncated" in content
+        assert len(content) < 10000  # Should be much smaller than original
+
+    def test_generate_commit_message_with_empty_diff(self):
+        """Test commit message generation with empty diff."""
+        request = git_camus.generate_commit_message("", "M test.py")
+        
+        assert "Git Diff:" in request["messages"][0]["content"]
+        assert request["model"] == "llama3.2"
+
+    def test_generate_commit_message_with_custom_model(self):
+        """Test commit message generation with custom model."""
+        with mock.patch.dict(os.environ, {"OLLAMA_MODEL": "codellama"}):
+            request = git_camus.generate_commit_message("diff", "status")
+            assert request["model"] == "codellama"
+
+    def test_call_ollama_api_with_custom_host(self):
+        """Test API call with custom host."""
+        with mock.patch.dict(os.environ, {"OLLAMA_HOST": "http://custom-host:8080"}):
+            with mock.patch("httpx.post") as mock_post:
+                mock_response = mock.MagicMock()
+                mock_response.status_code = 200
+                mock_response.raise_for_status.return_value = None
+                mock_response.json.return_value = {
+                    "message": {"content": "Test response", "role": "assistant"}
+                }
+                mock_post.return_value = mock_response
+
+                git_camus.call_ollama_api({"model": "test", "messages": [], "stream": False, "options": {}})
+
+                # Verify custom host was used
+                args, _ = mock_post.call_args
+                assert args[0] == "http://custom-host:8080/api/chat"
+
+    def test_perform_git_commit_success(self, mock_git_commands):
+        """Test successful git commit."""
+        _, mock_run = mock_git_commands
+        
+        with mock.patch("click.echo") as mock_echo:
+            git_camus.perform_git_commit("Test commit message")
+            
+            mock_run.assert_called_with(
+                ["git", "commit", "-m", "Test commit message"], check=True, text=True
+            )
+            mock_echo.assert_called_with("Committed with message: Test commit message")
+
+    def test_get_git_diff_with_stderr(self):
+        """Test git diff with stderr output."""
+        with mock.patch("subprocess.check_output") as mock_check:
+            mock_check.return_value = "diff output"
+            
+            result = git_camus.get_git_diff()
+            assert result == "diff output"
+
+    def test_get_git_status_with_stderr(self):
+        """Test git status with stderr output."""
+        with mock.patch("subprocess.check_output") as mock_check:
+            mock_check.return_value = "status output"
+            
+            result = git_camus.get_git_status()
+            assert result == "status output"
+
+    def test_run_git_camus_with_empty_response(self, mock_ollama_env, mock_git_commands):
+        """Test run_git_camus with empty API response."""
+        with mock.patch("httpx.post") as mock_post:
+            mock_response = mock.MagicMock()
+            mock_response.status_code = 200
+            mock_response.raise_for_status.return_value = None
+            mock_response.json.return_value = {"message": {"content": "", "role": "assistant"}}
+            mock_post.return_value = mock_response
+
+            with pytest.raises(SystemExit):
+                git_camus.run_git_camus(show=False, message=None)
+
+    def test_run_git_camus_with_missing_message_key(self, mock_ollama_env, mock_git_commands):
+        """Test run_git_camus with API response missing message key."""
+        with mock.patch("httpx.post") as mock_post:
+            mock_response = mock.MagicMock()
+            mock_response.status_code = 200
+            mock_response.raise_for_status.return_value = None
+            mock_response.json.return_value = {"some_other_key": "value"}
+            mock_post.return_value = mock_response
+
+            with pytest.raises(SystemExit):
+                git_camus.run_git_camus(show=False, message=None)
 
 
 class TestMainFunction:
     """Tests for main CLI function."""
 
-    def test_main_not_in_git_repo(self):
-        """Test main function outside of git repository."""
+    def test_run_git_camus_not_in_git_repo(self):
+        """Test run_git_camus function outside of git repository."""
         with mock.patch("subprocess.run") as mock_run:
             mock_run.side_effect = subprocess.CalledProcessError(128, "git rev-parse")
 
             with pytest.raises(SystemExit):
-                git_camus.main(show=False, message=None)
+                git_camus.run_git_camus(show=False, message=None)
 
-    def test_main_no_changes(self, mock_git_commands):
-        """Test main function with no git changes."""
+    def test_run_git_camus_no_changes(self, mock_git_commands):
+        """Test run_git_camus function with no git changes."""
         mock_check_output, _ = mock_git_commands
         mock_check_output.side_effect = lambda cmd, **kwargs: ""
 
         with pytest.raises(SystemExit) as excinfo:
-            git_camus.main(show=False, message=None)
+            git_camus.run_git_camus(show=False, message=None)
 
         assert excinfo.value.code == 0
 
-    def test_main_show_mode(self, mock_api_key, mock_git_commands, mock_anthropic_api):
-        """Test main function in show mode (no commit)."""
+    def test_run_git_camus_show_mode(self, mock_ollama_env, mock_git_commands, mock_ollama_api):
+        """Test run_git_camus function in show mode (no commit)."""
         with mock.patch("click.echo") as mock_echo:
             # Call the function in show mode
-            git_camus.main(show=True, message=None)
+            git_camus.run_git_camus(show=True, message=None)
 
             # Verify echo was called with the commit message
             mock_echo.assert_called_with("Confront the absurd: Add test function")
@@ -210,21 +336,21 @@ class TestMainFunction:
             for call in mock_run.call_args_list:
                 assert not (call[0][0][0] == "git" and call[0][0][1] == "commit")
 
-    def test_main_with_message_context(self, mock_api_key, mock_git_commands, mock_anthropic_api):
-        """Test main function with message context."""
+    def test_run_git_camus_with_message_context(self, mock_ollama_env, mock_git_commands, mock_ollama_api):
+        """Test run_git_camus function with message context."""
         # Call the function with a message
-        git_camus.main(show=False, message="Fix bug in authentication")
+        git_camus.run_git_camus(show=False, message="Fix bug in authentication")
 
         # Verify the API request contained the original message
-        args, kwargs = mock_anthropic_api.call_args
+        args, kwargs = mock_ollama_api.call_args
         messages = kwargs["json"]["messages"]
-        assert len(messages) == 3
-        assert "Fix bug in authentication" in messages[2]["content"]
+        assert len(messages) == 2
+        assert "Fix bug in authentication" in messages[1]["content"]
 
-    def test_main_commit_mode(self, mock_api_key, mock_git_commands, mock_anthropic_api):
-        """Test main function in commit mode."""
+    def test_run_git_camus_commit_mode(self, mock_ollama_env, mock_git_commands, mock_ollama_api):
+        """Test run_git_camus function in commit mode."""
         # Call the function in commit mode
-        git_camus.main(show=False, message=None)
+        git_camus.run_git_camus(show=False, message=None)
 
         # Check that git commit was called with the generated message
         _, mock_run = mock_git_commands

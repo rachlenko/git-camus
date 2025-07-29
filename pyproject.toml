@@ -1,230 +1,181 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "git-camus"
-version = "0.1.0"
-description = ""
-authors = [
-    {name = "Evgeny Rachlenko",email = "evgeny.rachlenko@gmail.com"}
-]
-license = {text = "MIT"}
+version = "0.2.0"
+description = "Craft Git commit messages with existential flair using local Ollama"
 readme = "README.md"
-requires-python = ">=3.12"
+license = {text = "MIT"}
+authors = [
+    {name = "Evgeny Rachlenko", email = "evgeny.rachlenko@gmail.com"}
+]
+maintainers = [
+    {name = "Evgeny Rachlenko", email = "evgeny.rachlenko@gmail.com"}
+]
+keywords = ["git", "commit", "ollama", "ai", "philosophy", "camus", "existentialism"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Version Control :: Git",
+    "Topic :: Text Processing :: Linguistic",
+]
+requires-python = ">=3.9"
 dependencies = [
-    "fastapi (>=0.115.10,<0.116.0)",
-    "uvicorn (>=0.34.0,<0.35.0)",
-    "sqlalchemy[asyncio] (>=2.0.38,<3.0.0)",
-    "asyncpg (>=0.30.0,<0.31.0)",
-    "mypy (>=1.15.0,<2.0.0)",
-    "aider-install (>=0.1.3,<0.2.0)"
+    "click>=8.0.0",
+    "httpx>=0.24.0",
 ]
 
-[tool.poetry.dependencies]
-python = "^3.12"
-requests = "^2.32.3"
-click = "^8.1.8"
-types-requests = "^2.32.0.20241016"
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "pytest-xdist>=3.0.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+    "mypy>=1.0.0",
+    "pre-commit>=3.0.0",
+]
+docs = [
+    "sphinx>=7.0.0",
+    "sphinx-rtd-theme>=1.0.0",
+    "myst-parser>=1.0.0",
+]
+test = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "pytest-xdist>=3.0.0",
+]
 
-[build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.poetry]
-package-mode = false
+[project.scripts]
+git-camus = "git_camus:main"
 
 [project.urls]
 Homepage = "https://github.com/rachlenko/git-camus"
-Documentation = "https://github.com/rachlenko/git-camus"
+Documentation = "https://git-camus.readthedocs.io/"
 Repository = "https://github.com/rachlenko/git-camus"
-Changelog = "https://github.com/rachlenko/git-camus/CHANGELOG.md"
+Changelog = "https://github.com/rachlenko/git-camus/blob/main/CHANGELOG.md"
 Issues = "https://github.com/rachlenko/git-camus/issues"
+Discussions = "https://github.com/rachlenko/git-camus/discussions"
 
-[tool.poetry.group.dev.dependencies]
-pytest = "^8.3.4"
-ruff = "^0.9.1"
-mypy = "^1.14.1"
-black = "^24.10.0"
-sphinx = "^8.1.3"
-furo = "^2024.8.6"
-myst-parser = "^4.0.0"
-sphinx-inline-tabs = "^2023.4.21"
-types-psutil = "^6.1.0.20241221"
-types-setuptools = "^75.8.0.20250110"
-typing-extensions = "^4.12.2"
-tomli = "^2.2.1"
-setuptools = "^75.8.0"
-mypy-extensions = "^1.0.0"
-pytest-cov = "^6.0.0"
-pytest-xdist = "^3.6.1"
-pre-commit = "^4.0.1"
-ansible = "^11.1.0"
-poethepoet = "^0.32.1"
-icecream = "^2.1.4"
-nuitka = "^2.5.9"
-attrs = "^24.3.0"
-coverage = "^7.6.10"
-iniconfig = "^2.0.0"
-pluggy = "^1.5.0"
-py = "^1.11.0"
-pyparsing = "^3.2.1"
-certifi = "^2024.12.14"
-chardet = "^5.2.0"
-idna = "^3.10"
-pygments = "^2.19.1"
-urllib3 = "^2.3.0"
+[tool.setuptools]
+packages = []
+py-modules = ["git_camus"]
 
-[ project.scripts] 
-git-camus = "git_camus:main"
-
-#poetry run mypy --strict .\git-camus.py
-mypy = "mypy.__main__:console_entry"
-stubgen = "mypy.stubgen:main"
-stubtest = "mypy.stubtest:main"
-dmypy = "mypy.dmypy.client:console_entry"
-mypyc = "mypyc.__main__:main"
+[tool.setuptools.package-data]
+git_camus = ["py.typed"]
 
 [tool.black]
 line-length = 99
 target-version = ["py39", "py310", "py311", "py312", "py313"]
 skip-magic-trailing-comma = true
-force-exclude = '''
-^/git-camus/typeshed|
-^/git-camus/test-data|
-^/test-data
-'''
 
 [tool.ruff]
 line-length = 99
 target-version = "py39"
 fix = true
-
-extend-exclude = [
-  "@*",
-  # Sphinx configuration is irrelevant
-  "docs/source/conf.py",
-  "git-camus/doc/conf.py",
-  # tests have more relaxed styling requirements
-  # fixtures have their own .pyi-specific configuration
-  "test-data/*",
-  "git-camus/test-data/*",
-  # typeshed has its own .pyi-specific configuration
-  "git-camus/typeshed/*",
-]
-
-[tool.ruff.lint]
 select = [
-  "E",       # pycodestyle (error)
-  "F",       # pyflakes
-  "W",       # pycodestyle (warning)
-  "B",       # flake8-bugbear
-  "I",       # isort
-  "N",       # pep8-naming
-  "PIE",     # flake8-pie
-  "PLE",     # pylint error
-  "RUF100",  # Unused noqa comments
-  "PGH004",  # blanket noqa comments
-  "UP",      # pyupgrade
-  "C4",      # flake8-comprehensions
-  "SIM201", "SIM202", "SIM222", "SIM223",  # flake8-simplify
-  "ISC001",  # implicitly concatenated string
-  "RET501", "RET502",  # better return None handling
+    "E",       # pycodestyle (error)
+    "F",       # pyflakes
+    "W",       # pycodestyle (warning)
+    "B",       # flake8-bugbear
+    "I",       # isort
+    "N",       # pep8-naming
+    "PIE",     # flake8-pie
+    "PLE",     # pylint error
+    "RUF100",  # Unused noqa comments
+    "PGH004",  # blanket noqa comments
+    "UP",      # pyupgrade
+    "C4",      # flake8-comprehensions
+    "SIM201", "SIM202", "SIM222", "SIM223",  # flake8-simplify
+    "ISC001",  # implicitly concatenated string
+    "RET501", "RET502",  # better return None handling
 ]
-
 ignore = [
-  "B007",  # Loop control variable not used within the loop body.
-  "B011",  # Don't use assert False
-  "B023",  # Function definition does not bind loop variable
-  "E2",    # conflicts with black
-  "E402",  # module level import not at top of file
-  "E501",  # conflicts with black
-  "E721",  # Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks
-  "E731",  # Do not assign a `lambda` expression, use a `def`
-  "E741",  # Ambiguous variable name
-  "N818",  # Exception should be named with an Error suffix
-  "N806",  # UPPER_CASE used for constant local variables
-  "UP031", # Use format specifiers instead of percent format
-  "UP032", # 'f-string always preferable to format' is controversial
-  "C409",  # https://github.com/astral-sh/ruff/issues/12912
-  "C420",  # reads a little worse. fromkeys predates dict comprehensions
-  "C416",  # There are a few cases where it's nice to have names for the dict items
-  "PIE790", # there's nothing wrong with pass
+    "B007",  # Loop control variable not used within the loop body.
+    "B011",  # Don't use assert False
+    "B023",  # Function definition does not bind loop variable
+    "E2",    # conflicts with black
+    "E402",  # module level import not at top of file
+    "E501",  # conflicts with black
+    "E721",  # Use `is` and `is not` for type comparisons
+    "E731",  # Do not assign a `lambda` expression, use a `def`
+    "E741",  # Ambiguous variable name
+    "N818",  # Exception should be named with an Error suffix
+    "N806",  # UPPER_CASE used for constant local variables
+    "UP031", # Use format specifiers instead of percent format
+    "UP032", # 'f-string always preferable to format' is controversial
+    "C409",  # https://github.com/astral-sh/ruff/issues/12912
+    "C420",  # reads a little worse. fromkeys predates dict comprehensions
+    "C416",  # There are a few cases where it's nice to have names for the dict items
+    "PIE790", # there's nothing wrong with pass
 ]
-
-unfixable = [
-    "F841",  # unused variable. ruff keeps the call, but mostly we want to get rid of it all
-    "F601",  # automatic fix might obscure issue
-    "F602",  # automatic fix might obscure issue
-    "B018",  # automatic fix might obscure issue
-    "UP036", # sometimes it's better to just noqa this
-    "SIM222", # automatic fix might obscure issue
-    "SIM223", # automatic fix might obscure issue
-]
-
-[tool.ruff.lint.per-file-ignores]
-# Mixed case variable and function names.
-"git-camus/fastparse.py" = ["N802", "N816"]
 
 [tool.ruff.lint.isort]
 combine-as-imports = true
 extra-standard-library = ["typing_extensions"]
 
-[tool.check-manifest]
-ignore = ["**/.readthedocs.yaml"]
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
 
 [tool.pytest.ini_options]
 minversion = "7.0.0"
-testpaths = ["git-camus/test"]
+testpaths = ["tests"]
 python_files = 'test*.py'
-
-# Where do the test cases come from?  We provide our own collection
-# logic by implementing `pytest_pycollect_makeitem` in mypy.test.data;
-# the test files import that module, and pytest sees the magic name
-# and invokes it at the relevant moment.  See
-# https://doc.pytest.org/en/latest/how-to/writing_plugins.html#collection-hooks
-
-# Both our plugin and unittest provide their own collection logic,
-# So we can disable the default python collector by giving it empty
-# patterns to search for.
-# Note that unittest requires that no "Test*" classes exist.
-python_classes = []
-python_functions = []
-
-# always run in parallel (requires pytest-xdist, see test-requirements.txt)
-# and enable strict mode: require all markers
-# to be defined and raise on invalid config values
-addopts = "-nauto --strict-markers --strict-config"
-
-# treat xpasses as test failures so they get converted to regular tests as soon as possible
-xfail_strict = true
+python_classes = 'Test*'
+python_functions = 'test_*'
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--cov=git_camus",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--cov-report=xml",
+    "--cov-fail-under=90",
+]
 
 [tool.coverage.run]
 branch = true
-source = ["git-camus"]
+source = ["git_camus"]
 parallel = true
 
 [tool.coverage.report]
 show_missing = true
 skip_covered = true
-omit = ['git-camus/test/*']
+omit = ['tests/*', 'setup.py']
 exclude_lines = [
-  '\#\s*pragma: no cover',
-  '^\s*raise AssertionError\b',
-  '^\s*raise NotImplementedError\b',
-  '^\s*return NotImplemented\b',
-  '^\s*raise$',
-  '^assert False\b',
-  '''^if __name__ == ['"]__main__['"]:$''',
+    '\#\s*pragma: no cover',
+    '^\s*raise AssertionError\b',
+    '^\s*raise NotImplementedError\b',
+    '^\s*return NotImplemented\b',
+    '^\s*raise$',
+    '^assert False\b',
+    '''^if __name__ == ['"]__main__['"]:$''',
 ]
 
- [tool.poe]
- envfile = ".env"
+[tool.coverage.html]
+directory = "htmlcov"
 
-
-#poetry run poe [OPTION]
-#example: poetry run poe check
-[tool.poe.tasks]
-type-check.shell = "poetry run mypy --strict git_camus.py"
-pytest-cov.shell = "poetry run pytest --cov=git-camus --cov-report=term-missing"
-format.shell = "black ."
-doc-build.shell = "poetry run sphinx-build -b html docs/source docs/build"
-report.shell = "make report"
-nuitka.shell = "nuitka -standalone -lto=yes -onefile -follow-imports -enable-plugin=pyqt6 git_camus.py"
-archive.shell = "git archive -o git-camus.zip HEAD"
+[tool.coverage.xml]
+output = "coverage.xml"

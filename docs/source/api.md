@@ -1,148 +1,159 @@
 # API Reference
 
-This page documents the Python API of Git-Camus, which you can use to integrate the functionality into your own tools or workflows.
+This document provides detailed information about the Git-Camus API and its integration with Ollama.
 
 ## Core Functions
 
 ### Git Operations
 
-```{eval-rst}
-.. py:function:: get_git_diff() -> str
+#### `get_git_diff() -> str`
 
-   Retrieve the staged changes in the git repository.
+Run `git diff --staged` to get the changes to be committed.
 
-   :return: The output of ``git diff --staged``
-   :rtype: str
-   :raises SystemExit: If the git command fails
+**Returns:**
+- `str`: The output of git diff showing pending changes.
+
+**Raises:**
+- `SystemExit`: If git diff fails or if not in a git repository.
+
+#### `get_git_status() -> str`
+
+Run `git status` to get the repository status.
+
+**Returns:**
+- `str`: The output of git status.
+
+**Raises:**
+- `SystemExit`: If git status fails or if not in a git repository.
+
+### Ollama API Integration
+
+#### `generate_commit_message(diff: str, status: str) -> OllamaRequest`
+
+Format the git diff and status data for the Ollama API request.
+
+**Parameters:**
+- `diff`: The output from git diff --staged
+- `status`: The output from git status -s
+
+**Returns:**
+- `OllamaRequest`: Request object for the Ollama API
+
+**Example:**
+```python
+diff = get_git_diff()
+status = get_git_status()
+request = generate_commit_message(diff, status)
 ```
 
-```{eval-rst}
-.. py:function:: get_git_status() -> str
+#### `call_ollama_api(request_data: OllamaRequest) -> Dict[str, Any]`
 
-   Get the current status of the git repository.
+Call the local Ollama API to generate a commit message.
 
-   :return: The output of ``git status -s``
-   :rtype: str
-   :raises SystemExit: If the git command fails
+**Parameters:**
+- `request_data`: Request data for the Ollama API
+
+**Returns:**
+- `Dict[str, Any]`: The API response
+
+**Raises:**
+- `SystemExit`: If the API call fails
+
+**Example:**
+```python
+response = call_ollama_api(request_data)
+commit_message = response.get("message", {}).get("content", "").strip()
 ```
 
-```{eval-rst}
-.. py:function:: perform_git_commit(message: str) -> None
+### Git Commit Operations
 
-   Execute a git commit with the provided message.
+#### `perform_git_commit(message: str) -> None`
 
-   :param message: The commit message to use
-   :type message: str
-   :raises SystemExit: If the git commit command fails
+Execute git commit with the provided message.
+
+**Parameters:**
+- `message`: The commit message to use
+
+**Raises:**
+- `SystemExit`: If git commit fails
+
+## Data Types
+
+### OllamaMessage
+
+Type for an Ollama API message.
+
+```python
+class OllamaMessage(TypedDict):
+    role: str      # "user" or "assistant"
+    content: str   # The message content
 ```
 
-### Anthropic API Integration
+### OllamaRequest
 
-```{eval-rst}
-.. py:function:: generate_commit_message(diff: str, status: str) -> dict
+Type definition for an Ollama API request.
 
-   Format git diff and status for the Anthropic Claude API request.
-
-   :param diff: Output from git diff --staged
-   :type diff: str
-   :param status: Output from git status -s
-   :type status: str
-   :return: Request object for the Anthropic API
-   :rtype: dict
+```python
+class OllamaRequest(TypedDict):
+    model: str                    # Model name (e.g., "llama3.2")
+    messages: List[OllamaMessage] # List of conversation messages
+    stream: bool                  # Whether to stream the response
+    options: Dict[str, Any]       # Generation options
 ```
 
-```{eval-rst}
-.. py:function:: call_anthropic_api(request_data: dict) -> dict
+## Configuration
 
-   Call the Anthropic Claude API to generate a commit message.
+### Environment Variables
 
-   :param request_data: Request data for the Anthropic API
-   :type request_data: dict
-   :return: The API response
-   :rtype: dict
-   :raises SystemExit: If the API call fails
-```
+- `OLLAMA_HOST`: Ollama service URL (default: "http://localhost:11434")
+- `OLLAMA_MODEL`: Model to use for generation (default: "llama3.2")
 
-### Command Line Interface
+### Generation Options
 
-```{eval-rst}
-.. py:function:: main(show: bool, message: Optional[str]) -> None
+The following options can be set in the `options` field of `OllamaRequest`:
 
-   Generate an existential commit message in the style of Albert Camus.
+- `temperature`: Controls randomness (0.0-1.0, default: 0.7)
+- `top_p`: Nucleus sampling parameter (0.0-1.0, default: 0.9)
+- `max_tokens`: Maximum tokens in response (default: 150)
 
-   :param show: If True, show the message without committing
-   :type show: bool
-   :param message: Optional original commit message to enhance
-   :type message: Optional[str]
-   :raises SystemExit: On various error conditions
-```
-
-## Type Definitions
-
-```{eval-rst}
-.. py:class:: AnthropicMessage
-
-   Type definition for a Claude API message.
-
-   .. py:attribute:: role
-      :type: str
-
-      The role of the message sender (system, user, or assistant)
-
-   .. py:attribute:: content
-      :type: str
-
-      The content of the message
-```
-
-```{eval-rst}
-.. py:class:: AnthropicRequest
-
-   Type definition for an Anthropic API request.
-
-   .. py:attribute:: model
-      :type: str
-
-      The Claude model to use
-
-   .. py:attribute:: max_tokens
-      :type: int
-
-      Maximum number of tokens in the response
-
-   .. py:attribute:: messages
-      :type: List[AnthropicMessage]
-
-      List of messages in the conversation
-
-   .. py:attribute:: temperature
-      :type: float
-
-      Temperature setting for generation (0.0-1.0)
-```
-
-## Using Git-Camus as a Library
-
-You can use Git-Camus as a library in your Python scripts:
+## Example Usage
 
 ```python
 import git_camus
 
-# Get the current git changes
+# Get git information
 diff = git_camus.get_git_diff()
 status = git_camus.get_git_status()
 
-# Generate a request for the Anthropic API
+# Generate a request for the Ollama API
 request = git_camus.generate_commit_message(diff, status)
 
-# Call the API to get a philosophical commit message
-response = git_camus.call_anthropic_api(request)
+# Call the API
+response = git_camus.call_ollama_api(request)
 
-# Extract the message
-message = response.get("content", [{}])[0].get("text", "").strip()
+# Extract the commit message
+commit_message = response.get("message", {}).get("content", "").strip()
 
-# Use the message as needed
-print(message)
+# Commit the changes
+git_camus.perform_git_commit(commit_message)
 ```
 
-This allows you to integrate Git-Camus's functionality into your own tools or workflows.
+## Error Handling
+
+The API functions handle common errors and provide helpful error messages:
+
+- **Git repository errors**: Checks if you're in a git repository
+- **Ollama connection errors**: Verifies Ollama is running and accessible
+- **Model errors**: Ensures the specified model is available
+- **API errors**: Handles HTTP errors and provides debugging information
+
+## Integration with Ollama
+
+Git-Camus integrates with Ollama's chat API endpoint (`/api/chat`) to generate philosophical commit messages. The integration:
+
+1. Formats git changes into a structured prompt
+2. Sends the prompt to the local Ollama service
+3. Extracts the generated commit message from the response
+4. Handles errors gracefully with helpful messages
+
+The prompt is designed to generate commit messages that reflect existentialist philosophy while being relevant to the actual code changes.
