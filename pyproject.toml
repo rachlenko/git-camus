@@ -83,6 +83,8 @@ skip-magic-trailing-comma = true
 line-length = 99
 target-version = "py39"
 fix = true
+
+[tool.ruff.lint]
 select = [
     "E",       # pycodestyle (error)
     "F",       # pyflakes

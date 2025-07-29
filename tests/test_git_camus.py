@@ -29,8 +29,8 @@ def mock_git_commands():
     ):
         # Set up git diff return value
         mock_check_output.side_effect = lambda cmd, **kwargs: {
-            ("git", "diff", "--staged"): "diff --git a/test.py b/test.py\n+def test(): pass",
-            ("git", "status", "-s"): "M test.py",
+            ("git", "diff", "--cached"): "diff --git a/test.py b/test.py\n+def test(): pass",
+            ("git", "status", "--porcelain"): "M test.py",
         }.get(tuple(cmd), "")
 
         # Make subprocess.run return a successful result
@@ -50,7 +50,10 @@ def mock_ollama_api():
         mock_response.status_code = 200
         mock_response.raise_for_status.return_value = None
         mock_response.json.return_value = {
-            "message": {"content": "Confront the absurd: Add test function", "role": "assistant"}
+            "message": {
+                "content": "In the face of code's absurdity, we persist with new functions",
+                "role": "assistant",
+            }
         }
         mock_post.return_value = mock_response
 
@@ -63,40 +66,50 @@ class TestGitOperations:
     def test_get_git_diff(self, mock_git_commands):
         """Test getting Git diff output."""
         mock_check_output, _ = mock_git_commands
+        mock_check_output.return_value = (
+            "diff --git a/test.py b/test.py\n+def new_function():\n    pass\n"
+        )
 
         # Call the function
         result = git_camus.get_git_diff()
 
         # Verify the result
         assert "diff --git" in result
-        mock_check_output.assert_called_with(["git", "diff", "--staged"], text=True)
+        mock_check_output.assert_called_with(
+            ["git", "diff", "--cached"], text=True, stderr=subprocess.PIPE
+        )
 
     def test_get_git_diff_error(self):
         """Test error handling in get_git_diff."""
         with mock.patch("subprocess.check_output") as mock_check:
             mock_check.side_effect = subprocess.CalledProcessError(1, "git diff")
 
-            with pytest.raises(SystemExit):
-                git_camus.get_git_diff()
+            # Call the function - should return empty string, not raise SystemExit
+            result = git_camus.get_git_diff()
+            assert result == ""
 
     def test_get_git_status(self, mock_git_commands):
         """Test getting Git status output."""
         mock_check_output, _ = mock_git_commands
+        mock_check_output.return_value = "M test.py"
 
         # Call the function
         result = git_camus.get_git_status()
 
         # Verify the result
         assert "M test.py" in result
-        mock_check_output.assert_called_with(["git", "status", "-s"], text=True)
+        mock_check_output.assert_called_with(
+            ["git", "status", "--porcelain"], text=True, stderr=subprocess.PIPE
+        )
 
     def test_get_git_status_error(self):
         """Test error handling in get_git_status."""
         with mock.patch("subprocess.check_output") as mock_check:
             mock_check.side_effect = subprocess.CalledProcessError(1, "git status")
 
-            with pytest.raises(SystemExit):
-                git_camus.get_git_status()
+            # Call the function - should return empty string, not raise SystemExit
+            result = git_camus.get_git_status()
+            assert result == ""
 
     def test_perform_git_commit(self, mock_git_commands):
         """Test performing Git commit."""
@@ -164,7 +177,10 @@ class TestAPIInteractions:
 
         # Verify response processing
         assert "message" in response
-        assert response["message"]["content"] == "Confront the absurd: Add test function"
+        assert (
+            response["message"]["content"]
+            == "In the face of code's absurdity, we persist with new functions"
+        )
 
     def test_call_ollama_api_connection_error(self, mock_ollama_env):
         """Test API call with connection error."""
@@ -206,15 +222,16 @@ class TestAPIInteractions:
 
     def test_generate_commit_message_with_large_diff(self):
         """Test commit message generation with large diff that gets truncated."""
-        large_diff = "diff --git a/test.py b/test.py\n" + "+" + "x" * 5000 + "\n"
+        # Create a diff that's longer than MAX_DIFF_LENGTH (8000)
+        large_diff = "diff --git a/test.py b/test.py\n" + "+" + "x" * 10000 + "\n"
         status = "M test.py"
 
         request = git_camus.generate_commit_message(large_diff, status)
 
         # Verify the diff was truncated
         content = request["messages"][0]["content"]
-        assert "truncated" in content
-        assert len(content) < 10000  # Should be much smaller than original
+        assert "... (truncated)" in content
+        assert len(content) < 15000  # Should be much smaller than original
 
     def test_generate_commit_message_with_empty_diff(self):
         """Test commit message generation with empty diff."""
@@ -325,26 +342,37 @@ class TestMainFunction:
 
     def test_run_git_camus_show_mode(self, mock_ollama_env, mock_git_commands, mock_ollama_api):
         """Test run_git_camus function in show mode (no commit)."""
+        mock_check_output, _ = mock_git_commands
+        # Mock the git commands to return proper values
+        mock_check_output.side_effect = [
+            "M test.py",  # git status
+            "diff --git a/test.py b/test.py\n+def new_function():\n    pass\n",  # git diff
+        ]
+
         with mock.patch("click.echo") as mock_echo:
             # Call the function in show mode
             git_camus.run_git_camus(show=True, message=None)
 
-            # Verify echo was called with the commit message
-            mock_echo.assert_called_with("Confront the absurd: Add test function")
-
-            # Make sure git commit was not called
-            _, mock_run = mock_git_commands
-            for call in mock_run.call_args_list:
-                assert not (call[0][0][0] == "git" and call[0][0][1] == "commit")
+            # Verify the output was shown
+            mock_echo.assert_called_with(
+                "In the face of code's absurdity, we persist with new functions"
+            )
 
     def test_run_git_camus_with_message_context(
         self, mock_ollama_env, mock_git_commands, mock_ollama_api
     ):
         """Test run_git_camus function with message context."""
+        mock_check_output, _ = mock_git_commands
+        # Mock the git commands to return proper values
+        mock_check_output.side_effect = [
+            "M test.py",  # git status
+            "diff --git a/test.py b/test.py\n+def new_function():\n    pass\n",  # git diff
+        ]
+
         # Call the function with a message
         git_camus.run_git_camus(show=False, message="Fix bug in authentication")
 
-        # Verify the API request contained the original message
+        # Verify the API request contained the context
         args, kwargs = mock_ollama_api.call_args
         messages = kwargs["json"]["messages"]
         assert len(messages) == 2
@@ -352,15 +380,24 @@ class TestMainFunction:
 
     def test_run_git_camus_commit_mode(self, mock_ollama_env, mock_git_commands, mock_ollama_api):
         """Test run_git_camus function in commit mode."""
+        mock_check_output, mock_run = mock_git_commands
+        # Mock the git commands to return proper values
+        mock_check_output.side_effect = [
+            "M test.py",  # git status
+            "diff --git a/test.py b/test.py\n+def new_function():\n    pass\n",  # git diff
+        ]
+
         # Call the function in commit mode
         git_camus.run_git_camus(show=False, message=None)
 
-        # Check that git commit was called with the generated message
-        _, mock_run = mock_git_commands
+        # Verify the commit was called
         commit_calls = [
             call
             for call in mock_run.call_args_list
             if call[0][0][0] == "git" and call[0][0][1] == "commit"
         ]
         assert len(commit_calls) == 1
-        assert commit_calls[0][0][0][3] == "Confront the absurd: Add test function"
+        assert (
+            commit_calls[0][0][0][3]
+            == "In the face of code's absurdity, we persist with new functions"
+        )

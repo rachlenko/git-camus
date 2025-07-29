@@ -1,7 +1,8 @@
 import uvicorn
-from fatapi import FastAPI
-from core.config import settings
 from api import router as api_router
+from fatapi import FastAPI
+
+from core.config import settings
 
 app = FastAPI()
 app.include_router(api_router, prefix=settings.api.prefix)
