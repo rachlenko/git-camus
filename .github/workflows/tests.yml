@@ -72,7 +72,7 @@ jobs:
       run: ruff check .
 
     - name: Run mypy
-      run: mypy git_camus/
+      run: mypy git_camus.py
 
   build:
     runs-on: ubuntu-latest

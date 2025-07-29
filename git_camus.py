@@ -106,7 +106,7 @@ def call_ollama_api(request_data: OllamaRequest) -> dict[str, Any]:
         request_data: The formatted request data
 
     Returns:
-        dict: The API response containing the generated message
+        dict[str, Any]: The API response containing the generated message
 
     Raises:
         SystemExit: If the API call fails
@@ -116,7 +116,7 @@ def call_ollama_api(request_data: OllamaRequest) -> dict[str, Any]:
         click.echo("Sending request to Ollama API...", err=True)
         response = httpx.post(f"{ollama_host}/api/chat", json=request_data, timeout=60.0)
         response.raise_for_status()
-        return response.json()
+        return response.json()  # type: ignore[no-any-return]
     except httpx.HTTPError as e:
         click.echo(f"API error: {e}", err=True)
         click.echo("Make sure Ollama is running and accessible", err=True)
