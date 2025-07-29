@@ -93,11 +93,7 @@ Respond with only the commit message, no additional text."""
         "model": os.environ.get("OLLAMA_MODEL", "llama3.2"),
         "messages": [{"role": "user", "content": prompt}],
         "stream": False,
-        "options": {
-            "temperature": 0.7,
-            "top_p": 0.9,
-            "max_tokens": 150
-        }
+        "options": {"temperature": 0.7, "top_p": 0.9, "max_tokens": 150},
     }
 
 
@@ -114,16 +110,12 @@ def call_ollama_api(request_data: OllamaRequest) -> Dict[str, Any]:
         SystemExit: If the API call fails
     """
     ollama_host = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
-    
+
     try:
         # Debug information
         click.echo("Sending request to Ollama API...", err=True)
 
-        response = httpx.post(
-            f"{ollama_host}/api/chat",
-            json=request_data,
-            timeout=60.0,
-        )
+        response = httpx.post(f"{ollama_host}/api/chat", json=request_data, timeout=60.0)
 
         # If we get an error, let's print more details
         if response.status_code != 200:

@@ -14,10 +14,9 @@ import git_camus
 @pytest.fixture
 def mock_ollama_env():
     """Mock Ollama environment variables."""
-    with mock.patch.dict(os.environ, {
-        "OLLAMA_HOST": "http://localhost:11434",
-        "OLLAMA_MODEL": "llama3.2"
-    }):
+    with mock.patch.dict(
+        os.environ, {"OLLAMA_HOST": "http://localhost:11434", "OLLAMA_MODEL": "llama3.2"}
+    ):
         yield
 
 
@@ -151,7 +150,7 @@ class TestAPIInteractions:
             "model": "llama3.2",
             "messages": [{"role": "user", "content": "Test message"}],
             "stream": False,
-            "options": {"temperature": 0.7, "max_tokens": 150}
+            "options": {"temperature": 0.7, "max_tokens": 150},
         }
 
         # Call the function
@@ -209,9 +208,9 @@ class TestAPIInteractions:
         """Test commit message generation with large diff that gets truncated."""
         large_diff = "diff --git a/test.py b/test.py\n" + "+" + "x" * 5000 + "\n"
         status = "M test.py"
-        
+
         request = git_camus.generate_commit_message(large_diff, status)
-        
+
         # Verify the diff was truncated
         content = request["messages"][0]["content"]
         assert "truncated" in content
@@ -220,7 +219,7 @@ class TestAPIInteractions:
     def test_generate_commit_message_with_empty_diff(self):
         """Test commit message generation with empty diff."""
         request = git_camus.generate_commit_message("", "M test.py")
-        
+
         assert "Git Diff:" in request["messages"][0]["content"]
         assert request["model"] == "llama3.2"
 
@@ -242,7 +241,9 @@ class TestAPIInteractions:
                 }
                 mock_post.return_value = mock_response
 
-                git_camus.call_ollama_api({"model": "test", "messages": [], "stream": False, "options": {}})
+                git_camus.call_ollama_api(
+                    {"model": "test", "messages": [], "stream": False, "options": {}}
+                )
 
                 # Verify custom host was used
                 args, _ = mock_post.call_args
@@ -251,10 +252,10 @@ class TestAPIInteractions:
     def test_perform_git_commit_success(self, mock_git_commands):
         """Test successful git commit."""
         _, mock_run = mock_git_commands
-        
+
         with mock.patch("click.echo") as mock_echo:
             git_camus.perform_git_commit("Test commit message")
-            
+
             mock_run.assert_called_with(
                 ["git", "commit", "-m", "Test commit message"], check=True, text=True
             )
@@ -264,7 +265,7 @@ class TestAPIInteractions:
         """Test git diff with stderr output."""
         with mock.patch("subprocess.check_output") as mock_check:
             mock_check.return_value = "diff output"
-            
+
             result = git_camus.get_git_diff()
             assert result == "diff output"
 
@@ -272,7 +273,7 @@ class TestAPIInteractions:
         """Test git status with stderr output."""
         with mock.patch("subprocess.check_output") as mock_check:
             mock_check.return_value = "status output"
-            
+
             result = git_camus.get_git_status()
             assert result == "status output"
 
@@ -336,7 +337,9 @@ class TestMainFunction:
             for call in mock_run.call_args_list:
                 assert not (call[0][0][0] == "git" and call[0][0][1] == "commit")
 
-    def test_run_git_camus_with_message_context(self, mock_ollama_env, mock_git_commands, mock_ollama_api):
+    def test_run_git_camus_with_message_context(
+        self, mock_ollama_env, mock_git_commands, mock_ollama_api
+    ):
         """Test run_git_camus function with message context."""
         # Call the function with a message
         git_camus.run_git_camus(show=False, message="Fix bug in authentication")
