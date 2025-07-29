@@ -59,6 +59,44 @@ def perform_git_commit(message: str) -> None:
         sys.exit(1)
 
 
+def get_config_values() -> tuple[str, str, str]:
+    """Get configuration values from config file or defaults.
+
+    Returns:
+        tuple: (ollama_host, model_name, prompt_message)
+    """
+    # Default values
+    default_host = "http://localhost:11434"
+    default_model = "llama3.2"
+    default_prompt = (
+        "You are an AI assistant that generates philosophical commit messages in the style of Albert Camus.\n"
+        "Your task is to analyze git changes and create a commit message that reflects on the absurdity, rebellion, and human condition.\n\n"
+        "Git Diff:\n{diff}\n\nGit Status:\n{status}\n\n"
+        "Generate a philosophical commit message that:\n"
+        "1. Reflects on the nature of the changes made\n"
+        "2. Incorporates themes of existentialism and the absurd\n"
+        "3. Is concise but meaningful (max 150 characters)\n"
+        "4. Avoids technical jargon in favor of philosophical reflection\n\n"
+        "Respond with only the commit message, no explanations or additional text."
+    )
+
+    try:
+        from core.config import settings
+        ollama_host = settings.ollama.host
+        model_name = settings.run.model_name
+        prompt_message = settings.run.prompt_message
+    except Exception:
+        ollama_host = default_host
+        model_name = default_model
+        prompt_message = default_prompt
+
+    # Environment variables take precedence
+    ollama_host = os.environ.get("OLLAMA_HOST", ollama_host)
+    model_name = os.environ.get("OLLAMA_MODEL", model_name)
+
+    return ollama_host, model_name, prompt_message
+
+
 def generate_commit_message(diff: str, status: str) -> OllamaRequest:
     """Format the git diff and status data for the Ollama API.
 
@@ -74,22 +112,12 @@ def generate_commit_message(diff: str, status: str) -> OllamaRequest:
     if len(diff) > max_diff_length:
         diff = diff[:max_diff_length] + "\n... (truncated)"
 
-    # Import config dynamically to avoid circular import
-    try:
-        from core.config import settings
-        model_name = settings.run.model_name
-        prompt_message = settings.run.prompt_message
-    except Exception:
-        model_name = None
-        prompt_message = None
+    ollama_host, model_name, prompt_message = get_config_values()
 
-    model = os.environ.get("OLLAMA_MODEL", model_name or "llama3:70b")
-
-    prompt = (prompt_message or "You are an AI assistant that generates philosophical commit messages in the style of Albert Camus.\nYour task is to analyze git changes and create a commit message that reflects on the absurdity, rebellion, and human condition.\n\nGit Diff:\n{diff}\n\nGit Status:\n{status}\n\nGenerate a philosophical commit message that:\n1. Reflects on the nature of the changes made\n2. Incorporates themes of existentialism and the absurd\n3. Is concise but meaningful (max 150 characters)\n4. Avoids technical jargon in favor of philosophical reflection\n\nRespond with only the commit message, no explanations or additional text.")
-    prompt = prompt.format(diff=diff, status=status)
+    prompt = prompt_message.format(diff=diff, status=status)
 
     return {
-        "model": model,
+        "model": model_name,
         "messages": [{"role": "user", "content": prompt}],
         "stream": False,
         "options": {"temperature": 0.7, "top_p": 0.9, "max_tokens": 150},
@@ -108,7 +136,8 @@ def call_ollama_api(request_data: OllamaRequest) -> dict[str, Any]:
     Raises:
         SystemExit: If the API call fails
     """
-    ollama_host = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
+    ollama_host, _, _ = get_config_values()
+
     try:
         click.echo("Sending request to Ollama API...", err=True)
         response = httpx.post(f"{ollama_host}/api/chat", json=request_data, timeout=60.0)

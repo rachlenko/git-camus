@@ -1,5 +1,6 @@
 # Git-Camus: Craft Git Commit Messages with Existential Flair
-
+![git-camus](docs/images/git-camus_logo.jpeg)
+
 [![PyPI version](https://badge.fury.io/py/git-camus.svg)](https://badge.fury.io/py/git-camus)
 [![Python versions](https://img.shields.io/pypi/pyversions/git-camus.svg)](https://pypi.org/project/git-camus/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -43,13 +44,48 @@ ollama serve
 ollama pull llama3.2
 ```
 
-### 3. Install Git-Camus
+### 3. Install Git-Camus (Recommended Method)
+
+#### Using the Installation Script
+
+```bash
+# Download and run the installation script
+curl -fsSL https://raw.githubusercontent.com/rachlenko/git-camus/main/install.sh | bash
+```
+
+This script will:
+1. Create a virtual environment at `$HOME/.local/venvs/git-camus`
+2. Create the `$HOME/.local/bin` directory if it doesn't exist
+3. Install a wrapper script at `$HOME/.local/bin/git-camus`
+4. Install git-camus and its dependencies in the virtual environment
+
+#### Alternative Installation Methods
+
+##### From PyPI (Manual)
 
 ```bash
 pip install git-camus
 ```
 
-### 4. Use It!
+##### From Source
+
+```bash
+git clone https://github.com/rachlenko/git-camus.git
+cd git-camus
+pip install -e .
+```
+
+### 4. Add to PATH (if needed)
+
+If `~/.local/bin` is not in your PATH, add it:
+
+```bash
+# Add to ~/.bashrc or ~/.zshrc
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+### 5. Use It!
 
 ```bash
 # Stage your changes
@@ -71,60 +107,9 @@ Git-Camus generates philosophical reflections like:
 - `"Confronting the human condition through user validation"`
 - `"Documentation: maps for navigating our digital Sisyphean task"`
 
-## 🛠️ Installation
-
-### From PyPI (Recommended)
-
-```bash
-pip install git-camus
-```
-
-### From Source
-
-```bash
-git clone https://github.com/rachlenko/git-camus.git
-cd git-camus
-pip install -e .
-```
-
-### Development Installation
-
-```bash
-git clone https://github.com/rachlenko/git-camus.git
-cd git-camus
-pip install -e ".[dev]"
-```
-
-## 🐳 Docker
-
-You can build and run Git-Camus in a Docker container:
-
-```bash
-# Build the Docker image
-sudo docker build -t git-camus .
-
-# Run with Ollama model (default: llama3:70b)
-sudo docker run --rm -it \
-  -v $(pwd):/repo \
-  -e OLLAMA_MODEL=llama3:70b \
-  git-camus
-```
-
-You can also mount a custom config file:
-
-```bash
-sudo docker run --rm -it \
-  -v $(pwd):/repo \
-  -v $(pwd)/your_config.toml:/app/config.toml \
-  git-camus
-```
-
 ## ⚙️ Configuration
 
-You can configure the Ollama model name in two ways:
-
-1. **Environment variable**: `OLLAMA_MODEL` (takes precedence)
-2. **Config file**: Edit `core/config.py` or provide a compatible config file with a `model_name` field under `[run]`.
+Git-Camus can be configured through environment variables or a configuration file.
 
 ### Environment Variables
 
@@ -138,17 +123,18 @@ export OLLAMA_MODEL="llama3.2"
 
 ### Configuration File
 
-Create a `.git-camus.toml` file in your project root:
+Create a `config.toml` file in your project root or in the git-camus directory:
 
 ```toml
+[run]
+model_name = "llama3:70b"
+prompt_message = "Your custom prompt here..."
+
 [ollama]
 host = "http://localhost:11434"
-model = "llama3.2"
-
-[generation]
-temperature = 0.7
-max_tokens = 150
 ```
+
+Environment variables take precedence over configuration file settings.
 
 ## 📖 Usage
 
@@ -183,6 +169,49 @@ Options:
   -s, --show          Show the generated message without committing
   -m, --message TEXT  Original commit message to enhance with Camus-style existentialism
   --help              Show this message and exit
+```
+
+## 🗑️ Uninstallation
+
+To uninstall Git-Camus:
+
+```bash
+# Download and run the uninstallation script
+curl -fsSL https://raw.githubusercontent.com/rachlenko/git-camus/main/uninstall.sh | bash
+```
+
+Or manually:
+
+```bash
+# Remove the virtual environment
+rm -rf "$HOME/.local/venvs/git-camus"
+
+# Remove the wrapper script
+rm -f "$HOME/.local/bin/git-camus"
+```
+
+## 🐳 Docker
+
+You can build and run Git-Camus in a Docker container:
+
+```bash
+# Build the Docker image
+sudo docker build -t git-camus .
+
+# Run with Ollama model (default: llama3:70b)
+sudo docker run --rm -it \
+  -v $(pwd):/repo \
+  -e OLLAMA_MODEL=llama3:70b \
+  git-camus
+```
+
+You can also mount a custom config file:
+
+```bash
+sudo docker run --rm -it \
+  -v $(pwd):/repo \
+  -v $(pwd)/your_config.toml:/app/config.toml \
+  git-camus
 ```
 
 ## 🧪 Testing
@@ -283,4 +312,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 <div align="center">
   <sub>Built with ❤️ and existentialism</sub>
 </div>
-
