@@ -92,7 +92,7 @@ Generate a philosophical commit message that:
 Respond with only the commit message, no explanations or additional text."""
 
     return {
-        "model": os.environ.get("OLLAMA_MODEL", "llama3.2"),
+        "model": os.environ.get("OLLAMA_MODEL", "llama3:70b"),
         "messages": [{"role": "user", "content": prompt}],
         "stream": False,
         "options": {"temperature": 0.7, "top_p": 0.9, "max_tokens": 150},
