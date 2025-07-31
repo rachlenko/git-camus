@@ -140,7 +140,7 @@ def call_ollama_api(request_data: OllamaRequest) -> dict[str, Any]:
 
     try:
         click.echo("Sending request to Ollama API...", err=True)
-        response = httpx.post(f"{ollama_host}/api/chat", json=request_data, timeout=60.0)
+        response = httpx.post(f"{ollama_host}/api/chat", json=request_data, timeout=120.0)
         response.raise_for_status()
         return response.json()  # type: ignore[no-any-return]
     except httpx.HTTPError as e:
