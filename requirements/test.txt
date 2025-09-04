@@ -1,0 +1,12 @@
+# Testing requirements
+-r base.txt
+
+# Testing framework
+pytest>=7.0.0
+pytest-cov>=4.0.0
+pytest-xdist>=3.0.0
+pytest-mock>=3.10.0
+
+# Security testing
+bandit[toml]>=1.7.0
+safety>=2.0.0

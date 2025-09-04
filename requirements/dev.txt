@@ -1,0 +1,17 @@
+# Development requirements
+-r base.txt
+
+# Code formatting and linting
+black>=23.0.0
+ruff>=0.1.0
+
+# Type checking
+mypy>=1.0.0
+types-requests
+
+# Git hooks
+pre-commit>=3.0.0
+
+# Development tools
+ipython
+ipdb

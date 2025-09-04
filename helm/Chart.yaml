@@ -1,0 +1,25 @@
+apiVersion: v2
+name: git-camus
+description: A Helm chart for git-camus - Generate philosophical Git commit messages inspired by Albert Camus
+type: application
+version: 0.2.0
+appVersion: "0.2.0"
+keywords:
+  - git
+  - commit
+  - ollama
+  - ai
+  - philosophy
+  - camus
+  - existentialism
+home: https://github.com/rachlenko/git-camus
+sources:
+  - https://github.com/rachlenko/git-camus
+maintainers:
+  - name: Evgeny Rachlenko
+    email: evgeny.rachlenko@gmail.com
+dependencies:
+  - name: ollama
+    version: "~0.1.0"
+    repository: "https://charts.ollama.com"
+    condition: ollama.enabled
