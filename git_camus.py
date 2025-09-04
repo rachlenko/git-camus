@@ -82,6 +82,7 @@ def get_config_values() -> tuple[str, str, str]:
 
     try:
         from core.config import settings
+
         ollama_host = settings.ollama.host
         model_name = settings.run.model_name
         prompt_message = settings.run.prompt_message

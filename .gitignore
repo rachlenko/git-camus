@@ -9,3 +9,10 @@ __pycache__/
 *.pywz
 .aider*
 build/
+./__pycache__
+./git_camus.egg-info
+./venv
+./dist
+./dist/git_camus-0.2.0-py3-none-any.whl ./dist/git_camus-0.2.0.tar.gz
+dist
+git_camus.egg-info/PKG-INFO
