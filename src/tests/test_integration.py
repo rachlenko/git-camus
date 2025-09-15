@@ -10,7 +10,7 @@ from unittest import mock
 import httpx
 import pytest
 
-import git_camus
+from git_camus.cli.commands import run_git_camus
 
 
 class TestGitCamusIntegration:
@@ -75,7 +75,7 @@ class TestGitCamusIntegration:
             original_cwd = os.getcwd()
             try:
                 os.chdir(temp_git_repo)
-                git_camus.run_git_camus(show=True, message=None)
+                run_git_camus(show=True, message=None)
 
                 # Verify the output
                 mock_echo.assert_called_with(
@@ -108,7 +108,7 @@ class TestGitCamusIntegration:
         original_cwd = os.getcwd()
         try:
             os.chdir(temp_git_repo)
-            git_camus.run_git_camus(show=False, message=None)
+            run_git_camus(show=False, message=None)
 
             # Verify commit was made
             result = subprocess.run(
@@ -146,7 +146,7 @@ class TestGitCamusIntegration:
         original_cwd = os.getcwd()
         try:
             os.chdir(temp_git_repo)
-            git_camus.run_git_camus(show=False, message="Add new function")
+            run_git_camus(show=False, message="Add new function")
 
             # Verify the API request contained the context
             args, kwargs = mock_ollama_api.call_args
@@ -188,7 +188,7 @@ class TestGitCamusIntegration:
             os.chdir(temp_git_repo)
 
             with pytest.raises(SystemExit) as excinfo:
-                git_camus.run_git_camus(show=False, message=None)
+                run_git_camus(show=False, message=None)
 
             assert excinfo.value.code == 0
 
@@ -203,7 +203,7 @@ class TestGitCamusIntegration:
                 os.chdir(temp_dir)
 
                 with pytest.raises(SystemExit):
-                    git_camus.run_git_camus(show=False, message=None)
+                    run_git_camus(show=False, message=None)
 
             finally:
                 os.chdir(original_cwd)
@@ -226,7 +226,7 @@ class TestGitCamusIntegration:
                 os.chdir(temp_git_repo)
 
                 with pytest.raises(SystemExit):
-                    git_camus.run_git_camus(show=False, message=None)
+                    run_git_camus(show=False, message=None)
 
             finally:
                 os.chdir(original_cwd)
@@ -247,7 +247,7 @@ class TestGitCamusIntegration:
             original_cwd = os.getcwd()
             try:
                 os.chdir(temp_git_repo)
-                git_camus.run_git_camus(show=True, message=None)
+                run_git_camus(show=True, message=None)
 
                 # Verify custom host was used
                 args, _ = mock_ollama_api.call_args
@@ -272,7 +272,7 @@ class TestGitCamusIntegration:
             original_cwd = os.getcwd()
             try:
                 os.chdir(temp_git_repo)
-                git_camus.run_git_camus(show=True, message=None)
+                run_git_camus(show=True, message=None)
 
                 # Verify custom model was used
                 args, kwargs = mock_ollama_api.call_args

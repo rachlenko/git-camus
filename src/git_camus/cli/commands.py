@@ -37,7 +37,7 @@ def run_git_camus(show: bool = False, message: Optional[str] = None) -> None:
 
     # Get configuration
     ollama_host, model_name, prompt_message = get_config_values()
-    
+
     # Initialize Ollama client
     client = OllamaClient(ollama_host)
 

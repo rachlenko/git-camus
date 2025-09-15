@@ -34,17 +34,17 @@ class TestRunGitCamus:
         mock_diff.return_value = "diff content"
         mock_has_changes.return_value = True
         mock_config.return_value = ("http://localhost:11434", "llama3.2", "prompt")
-        
+
         mock_client_instance = Mock()
         mock_ollama_client.return_value = mock_client_instance
         mock_client_instance.generate_commit_message_request.return_value = {"messages": []}
         mock_client_instance.call_api.return_value = {
             "message": {"content": "Philosophical commit message"}
         }
-        
+
         # Run function
         run_git_camus(show=False, message=None)
-        
+
         # Verify calls
         mock_check_repo.assert_called_once()
         mock_commit.assert_called_once_with("Philosophical commit message")
@@ -63,10 +63,10 @@ class TestRunGitCamus:
         """Test behavior when no staged changes."""
         mock_status.return_value = ""
         mock_has_changes.return_value = False
-        
+
         with pytest.raises(SystemExit):
             run_git_camus()
-        
+
         mock_echo.assert_called_once_with("No staged changes to commit.", err=True)
 
     @patch("git_camus.cli.commands.check_git_repository")
@@ -92,17 +92,17 @@ class TestRunGitCamus:
         mock_diff.return_value = "diff content"
         mock_has_changes.return_value = True
         mock_config.return_value = ("http://localhost:11434", "llama3.2", "prompt")
-        
+
         mock_client_instance = Mock()
         mock_ollama_client.return_value = mock_client_instance
         mock_client_instance.generate_commit_message_request.return_value = {"messages": []}
         mock_client_instance.call_api.return_value = {
             "message": {"content": "Philosophical commit message"}
         }
-        
+
         # Run function with show=True
         run_git_camus(show=True, message=None)
-        
+
         # Verify message is displayed, not committed
         mock_echo.assert_called_once_with("Philosophical commit message")
 
@@ -129,15 +129,15 @@ class TestRunGitCamus:
         mock_diff.return_value = "diff content"
         mock_has_changes.return_value = True
         mock_config.return_value = ("http://localhost:11434", "llama3.2", "prompt")
-        
+
         mock_client_instance = Mock()
         mock_ollama_client.return_value = mock_client_instance
         mock_client_instance.generate_commit_message_request.return_value = {"messages": []}
         mock_client_instance.call_api.return_value = {"message": {"content": ""}}
-        
+
         with pytest.raises(SystemExit):
             run_git_camus()
-        
+
         mock_echo.assert_called_once_with("Error: No commit message generated", err=True)
 
 
@@ -152,7 +152,7 @@ class TestCliCommands:
     def test_main_command_default(self, mock_run):
         """Test main command with default options."""
         result = self.runner.invoke(main, [])
-        
+
         assert result.exit_code == 0
         mock_run.assert_called_once_with(show=False, message=None)
 
@@ -160,7 +160,7 @@ class TestCliCommands:
     def test_main_command_with_show(self, mock_run):
         """Test main command with show flag."""
         result = self.runner.invoke(main, ["--show"])
-        
+
         assert result.exit_code == 0
         mock_run.assert_called_once_with(show=True, message=None)
 
@@ -168,7 +168,7 @@ class TestCliCommands:
     def test_main_command_with_message(self, mock_run):
         """Test main command with message option."""
         result = self.runner.invoke(main, ["--message", "test message"])
-        
+
         assert result.exit_code == 0
         mock_run.assert_called_once_with(show=False, message="test message")
 
@@ -176,6 +176,6 @@ class TestCliCommands:
     def test_main_command_with_both_options(self, mock_run):
         """Test main command with both options."""
         result = self.runner.invoke(main, ["-s", "-m", "test message"])
-        
+
         assert result.exit_code == 0
         mock_run.assert_called_once_with(show=True, message="test message")

@@ -132,10 +132,11 @@
 
   [tool.pytest.ini_options]
   minversion = "7.0.0"
-  testpaths = ["tests"]
+  testpaths = ["src/tests"]
   python_files = 'test*.py'
   python_classes = 'Test*'
   python_functions = 'test_*'
+  pythonpath = ["src"]
   addopts = [
       "--strict-markers",
       "--strict-config",

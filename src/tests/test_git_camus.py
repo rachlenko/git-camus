@@ -8,7 +8,13 @@ from unittest import mock
 import httpx
 import pytest
 
-import git_camus
+from git_camus.cli.commands import run_git_camus
+from git_camus.core.git_operations import (
+    get_git_diff,
+    get_git_status,
+    perform_git_commit,
+)
+from git_camus.core.ollama_client import OllamaClient
 
 
 @pytest.fixture
@@ -71,7 +77,7 @@ class TestGitOperations:
         )
 
         # Call the function
-        result = git_camus.get_git_diff()
+        result = get_git_diff()
 
         # Verify the result
         assert "diff --git" in result
@@ -85,7 +91,7 @@ class TestGitOperations:
             mock_check.side_effect = subprocess.CalledProcessError(1, "git diff")
 
             # Call the function - should return empty string, not raise SystemExit
-            result = git_camus.get_git_diff()
+            result = get_git_diff()
             assert result == ""
 
     def test_get_git_status(self, mock_git_commands):
@@ -94,7 +100,7 @@ class TestGitOperations:
         mock_check_output.return_value = "M test.py"
 
         # Call the function
-        result = git_camus.get_git_status()
+        result = get_git_status()
 
         # Verify the result
         assert "M test.py" in result
@@ -108,7 +114,7 @@ class TestGitOperations:
             mock_check.side_effect = subprocess.CalledProcessError(1, "git status")
 
             # Call the function - should return empty string, not raise SystemExit
-            result = git_camus.get_git_status()
+            result = get_git_status()
             assert result == ""
 
     def test_perform_git_commit(self, mock_git_commands):
@@ -116,7 +122,7 @@ class TestGitOperations:
         _, mock_run = mock_git_commands
 
         # Call the function
-        git_camus.perform_git_commit("Test commit message")
+        perform_git_commit("Test commit message")
 
         # Verify the subprocess call
         mock_run.assert_called_with(
@@ -129,7 +135,7 @@ class TestGitOperations:
             mock_run.side_effect = subprocess.CalledProcessError(1, "git commit")
 
             with pytest.raises(SystemExit):
-                git_camus.perform_git_commit("Test commit message")
+                perform_git_commit("Test commit message")
 
 
 class TestAPIInteractions:
@@ -138,7 +144,8 @@ class TestAPIInteractions:
     def test_generate_commit_message(self):
         """Test commit message request generation."""
         # Call the function
-        request = git_camus.generate_commit_message(
+        client = OllamaClient(host="http://localhost:11434")
+        request = client.generate_commit_message_request(
             "diff --git a/test.py b/test.py\n+def test(): pass", "M test.py"
         )
 
@@ -167,7 +174,8 @@ class TestAPIInteractions:
         }
 
         # Call the function
-        response = git_camus.call_ollama_api(request_data)
+        client = OllamaClient(host="http://localhost:11434")
+        response = client.call_api(request_data)
 
         # Verify API call
         mock_ollama_api.assert_called_once()
@@ -188,7 +196,8 @@ class TestAPIInteractions:
             mock_post.side_effect = httpx.ConnectError("Connection failed")
 
             with pytest.raises(SystemExit):
-                git_camus.call_ollama_api({})
+                client = OllamaClient(host="http://localhost:11434")
+                client.call_api({})
 
     def test_call_ollama_api_http_error(self, mock_ollama_env):
         """Test API call with HTTP error."""
@@ -196,7 +205,8 @@ class TestAPIInteractions:
             mock_post.side_effect = httpx.HTTPError("HTTP error")
 
             with pytest.raises(SystemExit):
-                git_camus.call_ollama_api({})
+                client = OllamaClient(host="http://localhost:11434")
+                client.call_api({})
 
     def test_call_ollama_api_http_status_error(self, mock_ollama_env):
         """Test API call with HTTP status error."""
@@ -210,7 +220,8 @@ class TestAPIInteractions:
             mock_post.return_value = mock_response
 
             with pytest.raises(SystemExit):
-                git_camus.call_ollama_api({})
+                client = OllamaClient(host="http://localhost:11434")
+                client.call_api({})
 
     def test_call_ollama_api_timeout_error(self, mock_ollama_env):
         """Test API call with timeout error."""
@@ -218,7 +229,8 @@ class TestAPIInteractions:
             mock_post.side_effect = httpx.TimeoutException("Request timed out")
 
             with pytest.raises(SystemExit):
-                git_camus.call_ollama_api({})
+                client = OllamaClient(host="http://localhost:11434")
+                client.call_api({})
 
     def test_generate_commit_message_with_large_diff(self):
         """Test commit message generation with large diff that gets truncated."""
@@ -226,7 +238,8 @@ class TestAPIInteractions:
         large_diff = "diff --git a/test.py b/test.py\n" + "+" + "x" * 10000 + "\n"
         status = "M test.py"
 
-        request = git_camus.generate_commit_message(large_diff, status)
+        client = OllamaClient(host="http://localhost:11434")
+        request = client.generate_commit_message_request(large_diff, status)
 
         # Verify the diff was truncated
         content = request["messages"][0]["content"]
@@ -235,7 +248,7 @@ class TestAPIInteractions:
 
     def test_generate_commit_message_with_empty_diff(self):
         """Test commit message generation with empty diff."""
-        request = git_camus.generate_commit_message("", "M test.py")
+        request = generate_commit_message("", "M test.py")
 
         assert "Git Diff:" in request["messages"][0]["content"]
         assert request["model"] == "llama3.2"
@@ -243,7 +256,7 @@ class TestAPIInteractions:
     def test_generate_commit_message_with_custom_model(self):
         """Test commit message generation with custom model."""
         with mock.patch.dict(os.environ, {"OLLAMA_MODEL": "codellama"}):
-            request = git_camus.generate_commit_message("diff", "status")
+            request = generate_commit_message("diff", "status")
             assert request["model"] == "codellama"
 
     def test_call_ollama_api_with_custom_host(self):
@@ -258,7 +271,7 @@ class TestAPIInteractions:
                 }
                 mock_post.return_value = mock_response
 
-                git_camus.call_ollama_api(
+                call_ollama_api(
                     {"model": "test", "messages": [], "stream": False, "options": {}}
                 )
 
@@ -271,7 +284,7 @@ class TestAPIInteractions:
         _, mock_run = mock_git_commands
 
         with mock.patch("click.echo") as mock_echo:
-            git_camus.perform_git_commit("Test commit message")
+            perform_git_commit("Test commit message")
 
             mock_run.assert_called_with(
                 ["git", "commit", "-m", "Test commit message"], check=True, text=True
@@ -283,7 +296,7 @@ class TestAPIInteractions:
         with mock.patch("subprocess.check_output") as mock_check:
             mock_check.return_value = "diff output"
 
-            result = git_camus.get_git_diff()
+            result = get_git_diff()
             assert result == "diff output"
 
     def test_get_git_status_with_stderr(self):
@@ -291,7 +304,7 @@ class TestAPIInteractions:
         with mock.patch("subprocess.check_output") as mock_check:
             mock_check.return_value = "status output"
 
-            result = git_camus.get_git_status()
+            result = get_git_status()
             assert result == "status output"
 
     def test_run_git_camus_with_empty_response(self, mock_ollama_env, mock_git_commands):
@@ -304,7 +317,7 @@ class TestAPIInteractions:
             mock_post.return_value = mock_response
 
             with pytest.raises(SystemExit):
-                git_camus.run_git_camus(show=False, message=None)
+                run_git_camus(show=False, message=None)
 
     def test_run_git_camus_with_missing_message_key(self, mock_ollama_env, mock_git_commands):
         """Test run_git_camus with API response missing message key."""
@@ -316,7 +329,7 @@ class TestAPIInteractions:
             mock_post.return_value = mock_response
 
             with pytest.raises(SystemExit):
-                git_camus.run_git_camus(show=False, message=None)
+                run_git_camus(show=False, message=None)
 
 
 class TestMainFunction:
@@ -328,7 +341,7 @@ class TestMainFunction:
             mock_run.side_effect = subprocess.CalledProcessError(128, "git rev-parse")
 
             with pytest.raises(SystemExit):
-                git_camus.run_git_camus(show=False, message=None)
+                run_git_camus(show=False, message=None)
 
     def test_run_git_camus_no_changes(self, mock_git_commands):
         """Test run_git_camus function with no git changes."""
@@ -351,7 +364,7 @@ class TestMainFunction:
 
         with mock.patch("click.echo") as mock_echo:
             # Call the function in show mode
-            git_camus.run_git_camus(show=True, message=None)
+            run_git_camus(show=True, message=None)
 
             # Verify the output was shown
             mock_echo.assert_called_with(
@@ -370,7 +383,7 @@ class TestMainFunction:
         ]
 
         # Call the function with a message
-        git_camus.run_git_camus(show=False, message="Fix bug in authentication")
+        run_git_camus(show=False, message="Fix bug in authentication")
 
         # Verify the API request contained the context
         args, kwargs = mock_ollama_api.call_args
