@@ -7,7 +7,6 @@ click==8.2.1
 coverage==7.10.1
 execnet==2.1.1
 fastapi==0.116.1
-git-camus @ file:///home/evgeny/src/github/git-camus/dist/git_camus-0.2.0-py3-none-any.whl#sha256=e0e194273d9583c03b2ad666829b09718bf6d8290635808427fddf9264849a78
 h11==0.16.0
 htmlx==0.0.3
 httpcore==1.0.9

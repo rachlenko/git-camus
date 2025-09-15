@@ -1,10 +1,7 @@
-"""CLI commands implementation."""
+#!/usr/bin/env python3
+"""Main entry point for git-camus."""
 
-import sys
-from typing import Optional
-
-import click
-
+from .cli.commands import main
 from ..core.config import get_config_values
 from ..core.git_operations import (
     check_git_repository,
@@ -14,7 +11,16 @@ from ..core.git_operations import (
     perform_git_commit,
 )
 from ..core.ollama_client import OllamaClient
+import sys
+from typing import Optional
+import click
 
+
+@click.command()
+@click.option("--show", "-s", is_flag=True, help="Show the generated message without committing")
+@click.option(
+    "--message", "-m", help="Original commit message to enhance with Camus-style existentialism"
+)
 
 def run_git_camus(show: bool = False, message: Optional[str] = None) -> None:
     """Run the main git-camus logic.
@@ -64,12 +70,10 @@ def run_git_camus(show: bool = False, message: Optional[str] = None) -> None:
     else:
         perform_git_commit(commit_message)
 
-
-@click.command()
-@click.option("--show", "-s", is_flag=True, help="Show the generated message without committing")
-@click.option(
-    "--message", "-m", help="Original commit message to enhance with Camus-style existentialism"
-)
 def main(show: bool, message: Optional[str]) -> None:
     """Generate an existential commit message in the style of Albert Camus using local Ollama."""
     run_git_camus(show=show, message=message)
+    
+
+if __name__ == "__main__":
+    main()
