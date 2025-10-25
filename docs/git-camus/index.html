@@ -1,0 +1,419 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rachlenko.com</title>
+  <style>
+    :root {
+      --bg-color: #000000;
+      --header-bg: #111111;
+      --card-bg: #111111;
+      --text-color: #ffffff;
+      --link-color: #cccccc;
+      --border-color: #333333;
+      --accent-1: #222222;
+      --accent-2: #1a1a1a;
+    }
+    
+    body {
+      font-family: "Times New Roman", Times, serif;
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      line-height: 1.6;
+    }
+    
+    header {
+      background-color: var(--header-bg);
+      padding: 24px 0;
+      text-align: center;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 20px;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+    
+    .profile-card {
+      background-color: var(--card-bg);
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+    
+    .profile-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .profile-image {
+      width: 128px;
+      height: 128px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid var(--border-color);
+    }
+    
+    .profile-info {
+      margin-left: 20px;
+    }
+    
+    h1 {
+      font-size: 28px;
+      margin: 0 0 8px 0;
+      font-weight: bold;
+      letter-spacing: -0.5px;
+    }
+    
+    h2 {
+      font-size: 24px;
+      font-weight: bold;
+      margin: 24px 0 16px 0;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-color);
+      letter-spacing: -0.5px;
+    }
+    
+    .location {
+      color: #cccccc;
+      font-size: 16px;
+      margin-bottom: 4px;
+      font-style: italic;
+    }
+    
+    .profession {
+      color: #ffffff;
+      font-size: 18px;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+    
+    .social-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    
+    .social-links a {
+      display: inline-flex;
+      align-items: center;
+      text-decoration: none;
+      color: var(--link-color);
+      background-color: var(--accent-1);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 16px;
+      transition: background-color 0.2s;
+    }
+    
+    .social-links a:hover {
+      background-color: #333333;
+      color: #ffffff;
+    }
+    
+    .links-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 12px;
+      margin-bottom: 24px;
+    }
+    
+    .links-list a {
+      display: inline-block;
+      text-decoration: none;
+      color: var(--link-color);
+      background-color: var(--accent-1);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 16px;
+      transition: all 0.2s;
+    }
+    
+    .links-list a:hover {
+      background-color: #333333;
+      color: #ffffff;
+      transform: translateY(-2px);
+    }
+    
+    .social-icon {
+      margin-right: 8px;
+      width: 16px;
+      height: 16px;
+    }
+    
+
+    
+    footer {
+      text-align: center;
+      padding: 24px;
+      color: #777777;
+      font-size: 14px;
+      border-top: 1px solid var(--border-color);
+      margin-top: 40px;
+      font-style: italic;
+    }
+    
+    /* Terminal Styles */
+    .terminal-container {
+      background-color: #000;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+      font-family: "Courier New", monospace;
+    }
+    
+    .terminal-header {
+      background-color: #333;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .terminal-buttons {
+      display: flex;
+      gap: 6px;
+      margin-right: 12px;
+    }
+    
+    .terminal-button {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+    
+    .terminal-button.close {
+      background-color: #ff5f56;
+    }
+    
+    .terminal-button.minimize {
+      background-color: #ffbd2e;
+    }
+    
+    .terminal-button.maximize {
+      background-color: #27c93f;
+    }
+    
+    .terminal-title {
+      color: #fff;
+      font-size: 14px;
+    }
+    
+    #terminal-content {
+      color: #0f0;
+      padding: 12px;
+      height: 300px;
+      overflow-y: auto;
+    }
+    
+    #top-output {
+      margin: 0;
+      white-space: pre;
+      font-size: 14px;
+      line-height: 1.2;
+    }
+
+    /* Ideas Generator Frame Styles */
+    .ideas-generator-container {
+      background-color: var(--card-bg);
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      padding: 16px;
+      margin-bottom: 24px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    .ideas-frame {
+      width: 100%;
+      height: 500px;
+      border: none;
+      overflow: hidden;
+      border-radius: 4px;
+    }
+
+    .projects-section {
+    padding: 80px 0;
+    background-color: var(--calendula-light-yellow);
+}
+
+.projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+    margin-top: 40px;
+}
+
+.project-card {
+    background: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.project-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.project-icon {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 20px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.project-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.project-card h3 {
+    color: var(--calendula-dark-orange);
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+}
+
+.project-card p {
+    color: #555;
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+.project-link {
+    display: inline-block;
+    padding: 8px 20px;
+    background-color: var(--calendula-orange);
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+.project-link:hover {
+    background-color: var(--calendula-dark-orange);
+}
+
+@media (max-width: 768px) {
+    .projects-grid {
+        grid-template-columns: 1fr;
+    }
+}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>www.rachlenko.com</h1>
+    </div>
+  </header>
+  
+  <div class="container">
+    <div class="profile-card">
+      <div class="profile-header">
+        <img src="images/evgeny.png" alt="Evgeny Rachlenko" class="profile-image">
+        <div class="profile-info">
+          <h1>Evgeny Rachlenko</h1>
+          <div class="profession">Data Engineer</div>
+          <div class="location">
+            Madeira<br>
+            Portugal, 9215-065
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/terminal.js"></script>
+
+
+<section class="projects-section">
+    <div class="container">
+        <div class="section-heading">
+            <h2>My Projects</h2>
+            <p>Explore our suite of innovative productivity and development tools</p>
+        </div>
+
+        <div class="projects-grid">
+            <div class="project-card">
+                <div class="project-icon">
+                    <img src="calendula/documents/images/calendula_logo.jpeg" alt="Calendula">
+                </div>
+                <h3>Calendula</h3>
+                <p>Enterprise-grade strategic planning solution that synchronizes calendars across multiple platforms and prevents scheduling conflicts.</p>
+                <a href="#" class="project-link">Learn More</a>
+            </div>
+
+            <div class="project-card">
+                <div class="project-icon">
+                    <img src="git-camus/documents/images/git-camus_logo.jpeg" alt="Git-Camus">
+                </div>
+                <h3>Git-Camus</h3>
+                <p>Transform your Git commit messages into philosophical reflections inspired by the works of Albert Camus.</p>
+                <a href="git-camus/" class="project-link">Learn More</a>
+            </div>
+
+            <div class="project-card">
+                <div class="project-icon">
+                    <img src="cesar/documentation/images/cesar_logo.jpeg" alt="Cesar">
+                </div>
+                <h3>Cesar</h3>
+                <p>Visualize system activity through intuitive graphs, presenting complex performance data in an easily digestible format.</p>
+                <a href="cesar/index.html" class="project-link">Learn More</a>
+            </div>
+            <div class="project-card">
+                <div class="project-icon">
+                    <img src="sig/documentation/images/sig_logo.jpeg" alt="SIG">
+                </div>
+                <h3>SIG</h3>
+                <p>Smart Ideas Generator (SIG) is an innovative cognitive enhancement tool designed to unlock your mind's full creative potential. By employing advanced thought-pattern stimulation techniques, SIG helps break conventional thinking barriers, enabling you to generate more creative, original, and intelligent solutions to complex problems. Elevate your ideation process and discover new perspectives with this powerful mental catalyst for innovation.</p>
+                <a href="sig/smart_ideas_generator.html" class="project-link">Learn More</a>
+            </div>
+            <div class="project-card">
+                <div class="project-icon">
+                    <img src="terminal-games/documentation/images/terminal-games_logo.jpeg" alt="terminal-games">
+                </div>
+                <h3>Terminal Games</h3>
+                <p>All magic which happens in my terminal</p>
+                <a href="terminal-games/index.html" class="project-link">Learn More</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer>
+    © 2025 Evgeny Rachlenko
+</footer>
+
+   <div class="social-links">
+      <a href="https://linkedin.com/in/evgeny_rachlenko" target="_blank">
+        <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M20.5 2h-17A1.5 1.5 0 002 3.5v17A1.5 1.5 0 003.5 22h17a1.5 1.5 0 001.5-1.5v-17A1.5 1.5 0 0020.5 2zM8 19H5v-9h3zM6.5 8.25A1.75 1.75 0 118.3 6.5a1.78 1.78 0 01-1.8 1.75zM19 19h-3v-4.74c0-1.42-.6-1.93-1.38-1.93A1.74 1.74 0 0013 14.19a.66.66 0 000 .14V19h-3v-9h2.9v1.3a3.11 3.11 0 012.7-1.4c1.55 0 3.36.86 3.36 3.66z"></path>
+        </svg>
+        LinkedIn
+      </a>
+      <a href="https://github.com/rachlenko" target="_blank">
+        <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2C6.48 2 2 6.48 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0012 2z"></path>
+        </svg>
+        GitHub
+      </a>
+    </div>
+
+</body>
+</html>
