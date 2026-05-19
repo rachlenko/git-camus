@@ -12,11 +12,26 @@ class OllamaConfig(BaseModel):
     host: str = "http://localhost:11434"
 
 
+class OpenAIConfig(BaseModel):
+    """OpenAI API configuration."""
+    host: str = "https://api.openai.com/v1"
+    model_name: str = "gpt-4o-mini"
+    api_key: str = ""
+
+
+class ClaudeConfig(BaseModel):
+    """Anthropic Claude API configuration."""
+    host: str = "https://api.anthropic.com"
+    model_name: str = "claude-sonnet-4-20250514"
+    api_key: str = ""
+
+
 class RunConfig(BaseModel):
     """Runtime configuration."""
     host: str = "0.0.0.0"
     port: int = 8000
-    model_name: str = "llama3.2"  # Default model name for Ollama
+    provider: str = "ollama"
+    model_name: str = "llama3.2"
     prompt_message: str = (
         "You are an AI assistant that generates philosophical commit messages in the style of Albert Camus.\n"
         "Your task is to analyze git changes and create a commit message that reflects on the absurdity, rebellion, and human condition.\n\n"
@@ -38,6 +53,8 @@ class ApiPrefix(BaseModel):
 class Settings(BaseSettings):
     """Application settings."""
     ollama: OllamaConfig = OllamaConfig()
+    openai: OpenAIConfig = OpenAIConfig()
+    claude: ClaudeConfig = ClaudeConfig()
     run: RunConfig = RunConfig()
     api: ApiPrefix = ApiPrefix()
 

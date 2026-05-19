@@ -59,7 +59,7 @@
   ]
 
   [project.scripts]
-  git-camus = "git_camus.main:main"
+  git-camus = "git_camus:main"
 
   [project.urls]
   Homepage = "https://github.com/rachlenko/git-camus"
@@ -69,8 +69,9 @@
   Issues = "https://github.com/rachlenko/git-camus/issues"
   Discussions = "https://github.com/rachlenko/git-camus/discussions"
 
-  [tool.setuptools.packages.find]
-  where = ["src"]
+  [tool.setuptools]
+  py-modules = ["git_camus"]
+  packages = ["core"]
 
   [tool.setuptools.dynamic]
   version = {attr = "git_camus.__version__"}
