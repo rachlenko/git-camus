@@ -166,3 +166,5 @@ helm/charts/
 
 # UV lock file
 uv.lock
+# ralphex progress logs
+.ralphex/progress/
