@@ -76,8 +76,6 @@ def test_run_git_camus_routes_to_claude_cli(monkeypatch, capsys):
 
 
 def test_call_claude_cli_strips_code_fences(monkeypatch):
-    import subprocess
-
     def fake_run(cmd, **kwargs):
         return subprocess.CompletedProcess(cmd, 0, stdout="```\nfeat: rebel against entropy\n```\n", stderr="")
 
@@ -86,18 +84,13 @@ def test_call_claude_cli_strips_code_fences(monkeypatch):
 
 
 def test_call_claude_cli_strips_language_fence(monkeypatch):
-    import subprocess
-
     def fake_run(cmd, **kwargs):
         return subprocess.CompletedProcess(cmd, 0, stdout="```text\nfix: the absurd\n```", stderr="")
-
     monkeypatch.setattr(subprocess, "run", fake_run)
     assert git_camus.call_claude_cli([{"role": "user", "content": "x"}]) == "fix: the absurd"
 
 
 def test_call_claude_cli_plain_text_unchanged(monkeypatch):
-    import subprocess
-
     def fake_run(cmd, **kwargs):
         return subprocess.CompletedProcess(cmd, 0, stdout="docs: a plain line\n", stderr="")
 
