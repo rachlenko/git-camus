@@ -1,6 +1,6 @@
 # git-camus
 
-Craft Git commit messages with existential flair using [Ollama](https://ollama.com), [OpenAI](https://platform.openai.com/), or [Claude](https://docs.anthropic.com/).
+Craft Git commit messages with existential flair using [Ollama](https://ollama.com), [OpenAI](https://platform.openai.com/), [Claude](https://docs.anthropic.com/), or the [Claude CLI](https://github.com/anthropics/anthropic-sdk-python/).
 
 git-camus analyzes your staged changes and generates philosophical commit messages inspired by Albert Camus — reflecting on the absurdity, rebellion, and human condition behind every diff.
 
@@ -11,6 +11,7 @@ git-camus analyzes your staged changes and generates philosophical commit messag
   - **Ollama** (default) — running locally or accessible via network, with a pulled model (default: `llama3.2`)
   - **OpenAI** — an API key with access to chat completions (default model: `gpt-4o-mini`)
   - **Claude** — an Anthropic API key (default model: `claude-sonnet-4-20250514`)
+  - **Claude CLI** — a locally-installed Claude CLI with active login (no API key required)
 
 ## Installation
 
@@ -62,7 +63,7 @@ git-camus
 |------|-------------|
 | `--show`, `-s` | Preview the generated message without committing |
 | `--message`, `-m` | Provide context to guide the philosophical reflection |
-| `--provider`, `-p` | LLM provider: `ollama` (default), `openai`, or `claude` |
+| `--provider`, `-p` | LLM provider: `ollama` (default), `openai`, `claude`, or `claude-cli` |
 
 ### Examples
 
@@ -115,11 +116,28 @@ git-camus
 | `ANTHROPIC_API_HOST` | `https://api.anthropic.com` | Anthropic-compatible API endpoint |
 | `ANTHROPIC_MODEL` | `claude-sonnet-4-20250514` | Model to use for generation |
 
+### `claude-cli` provider
+
+Generate the message with your locally-installed **Claude CLI** (`claude -p`),
+using the CLI's own login — **no `ANTHROPIC_API_KEY` required**:
+
+```bash
+git-camus -p claude-cli            # or: GIT_CAMUS_PROVIDER=claude-cli git-camus
+```
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `GIT_CAMUS_CLAUDE_CLI_BIN` | `claude` | Path to the Claude CLI binary |
+
+Requires the `claude` CLI on your `PATH` and logged in. Unlike the `claude` provider (Anthropic HTTP API,
+needs a key), `claude-cli` strips `ANTHROPIC_API_KEY`/`ANTHROPIC_AUTH_TOKEN` so
+the CLI authenticates the same way it does when you run it directly.
+
 ### General
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `GIT_CAMUS_PROVIDER` | `ollama` | Default provider (`ollama`, `openai`, or `claude`) |
+| `GIT_CAMUS_PROVIDER` | `ollama` | Default provider (`ollama`, `openai`, `claude`, or `claude-cli`) |
 
 The `OPENAI_API_HOST` and `ANTHROPIC_API_HOST` variables allow using any compatible API proxy or gateway.
 
