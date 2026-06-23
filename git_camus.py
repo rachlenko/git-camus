@@ -212,6 +212,17 @@ def call_claude(host: str, model: str, messages: list[ChatMessage], api_key: str
         sys.exit(1)
 
 
+def _strip_code_fences(text: str) -> str:
+    t = text.strip()
+    if t.startswith("```") and t.endswith("```"):
+        lines = t.splitlines()
+        if len(lines) >= 2:
+            # Drop the opening fence (``` or ```lang) and the closing fence.
+            lines = lines[1:-1]
+        return "\n".join(lines).strip()
+    return t
+
+
 def call_claude_cli(messages: list[ChatMessage], binary: Optional[str] = None) -> str:
     prompt = DEFAULT_SYSTEM_PROMPT + "\n\n" + "\n\n".join(m["content"] for m in messages)
     binary = binary or os.environ.get("GIT_CAMUS_CLAUDE_CLI_BIN", "claude")
@@ -235,7 +246,7 @@ def call_claude_cli(messages: list[ChatMessage], binary: Optional[str] = None) -
     if result.returncode != 0:
         click.echo(f"Error: 'claude -p' failed: {result.stderr.strip()}", err=True)
         sys.exit(1)
-    return result.stdout.strip()
+    return _strip_code_fences(result.stdout)
 
 
 def run_git_camus(show: bool = False, message: Optional[str] = None, provider: Optional[str] = None) -> None:
