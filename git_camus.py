@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Generate philosophical Git commit messages inspired by Albert Camus using Ollama, OpenAI, or Claude."""
 
-__version__ = "0.4.0"
+__version__ = "0.5.0"
 
 import os
 import subprocess
@@ -13,7 +13,7 @@ import httpx
 
 MAX_DIFF_LENGTH = 8000
 
-PROVIDERS = ("ollama", "openai", "claude")
+PROVIDERS = ("ollama", "openai", "claude", "claude-cli")
 
 DEFAULT_SYSTEM_PROMPT = (
     "You are an AI assistant that generates philosophical commit messages in the style of Albert Camus. "
@@ -96,6 +96,10 @@ def get_config_values(provider: str) -> tuple[str, str, str, Optional[str]]:
             click.echo("Error: ANTHROPIC_API_KEY environment variable is required for claude provider", err=True)
             sys.exit(1)
         return host, model, prompt_message, api_key
+
+    if provider == "claude-cli":
+        # The claude CLI authenticates via its own login; no host/model/key here.
+        return "", "", prompt_message, None
 
     if provider == "openai":
         host = os.environ.get("OPENAI_API_HOST", DEFAULT_OPENAI_HOST)
@@ -208,6 +212,32 @@ def call_claude(host: str, model: str, messages: list[ChatMessage], api_key: str
         sys.exit(1)
 
 
+def call_claude_cli(messages: list[ChatMessage], binary: Optional[str] = None) -> str:
+    prompt = DEFAULT_SYSTEM_PROMPT + "\n\n" + "\n\n".join(m["content"] for m in messages)
+    binary = binary or os.environ.get("GIT_CAMUS_CLAUDE_CLI_BIN", "claude")
+    # Drop API-key env so the claude CLI uses its own login (the same way it
+    # authenticates when run directly), not an ANTHROPIC_API_KEY.
+    env = {k: v for k, v in os.environ.items() if k not in ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN")}
+    try:
+        click.echo("Generating commit message via 'claude -p'...", err=True)
+        result = subprocess.run(
+            [binary, "-p", prompt], capture_output=True, text=True, timeout=120, env=env
+        )
+    except FileNotFoundError:
+        click.echo(
+            f"Error: '{binary}' CLI not found on PATH (claude-cli provider needs the Claude CLI)",
+            err=True,
+        )
+        sys.exit(1)
+    except subprocess.TimeoutExpired:
+        click.echo("Error: 'claude -p' timed out", err=True)
+        sys.exit(1)
+    if result.returncode != 0:
+        click.echo(f"Error: 'claude -p' failed: {result.stderr.strip()}", err=True)
+        sys.exit(1)
+    return result.stdout.strip()
+
+
 def run_git_camus(show: bool = False, message: Optional[str] = None, provider: Optional[str] = None) -> None:
     try:
         subprocess.run(
@@ -232,6 +262,8 @@ def run_git_camus(show: bool = False, message: Optional[str] = None, provider: O
 
     if provider == "claude":
         commit_message = call_claude(host, model, messages, api_key)  # type: ignore[arg-type]
+    elif provider == "claude-cli":
+        commit_message = call_claude_cli(messages)
     elif provider == "openai":
         commit_message = call_openai(host, model, messages, api_key)  # type: ignore[arg-type]
     else:
