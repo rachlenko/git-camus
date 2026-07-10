@@ -15,19 +15,24 @@ git-camus analyzes your staged changes and generates philosophical commit messag
 
 ## Installation
 
-Install the latest release directly from GitHub:
+Install the latest release from PyPI:
+
+```bash
+pip install git-camus
+```
+
+Or install a specific version:
+
+```bash
+pip install git-camus==0.5.0
+```
+
+You can also install from GitHub — useful for the current `main` branch or a specific tag:
 
 ```bash
 pip install git+https://github.com/rachlenko/git-camus.git
-```
-
-Or install a specific tag:
-
-```bash
 pip install git+https://github.com/rachlenko/git-camus.git@v0.5.0
 ```
-
-A PyPI release is planned; once published, `pip install git-camus` will pull the same version.
 
 ### Standalone install (isolated virtualenv + wrapper binary)
 
