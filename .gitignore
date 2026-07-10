@@ -168,3 +168,6 @@ helm/charts/
 uv.lock
 # ralphex progress logs
 .ralphex/progress/
+
+# Obsidian editor state
+.obsidian/
