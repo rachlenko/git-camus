@@ -1,5 +1,7 @@
 # git-camus
 
+![git-camus logo](https://raw.githubusercontent.com/rachlenko/git-camus/main/docs/images/git-camus_logo.jpeg)
+
 Craft Git commit messages with existential flair using [Ollama](https://ollama.com), [OpenAI](https://platform.openai.com/), [Claude](https://docs.anthropic.com/), or the [Claude CLI](https://docs.claude.com/en/docs/claude-code).
 
 git-camus analyzes your staged changes and generates philosophical commit messages inspired by Albert Camus — reflecting on the absurdity, rebellion, and human condition behind every diff.
