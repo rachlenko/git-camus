@@ -1,150 +1,668 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Git-Camus: Transform your Git commit messages into philosophical reflections inspired by Albert Camus. Explore the human condition through your version control.">
-    <meta name="keywords" content="Git, Albert Camus, Philosophy, Commit Messages, Existentialism, Absurdism">
-    <title>Git-Camus: Commit to the Absurd</title>
-    <style>
-        body {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
-            margin: 0;
-            padding: 0;
-        }
-        header {
-            background-color: #333;
-            color: #f4f4f9;
-            padding: 20px;
-            text-align: center;
-        }
-        h1 {
-            margin: 0;
-            font-size: 2.5rem;
-            letter-spacing: 1px;
-        }
-        .logo-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 10px;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            text-align: center;
-        }
-        p {
-            font-size: 1.2rem;
-            line-height: 1.8;
-            margin-bottom: 20px;
-        }
-        code {
-            background-color: #efefef;
-            padding: 0.2rem 0.5rem;
-            border-radius: 5px;
-        }
-        .cta {
-            margin-top: 30px;
-            padding: 10px 20px;
-            background-color: #333;
-            color: #fff;
-            border: none;
-            font-size: 1.2rem;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        .cta:hover {
-            background-color: #555;
-        }
-        .hero {
-            padding: 80px 0;
-            text-align: center;
-            background: linear-gradient(135deg, var(--camus-light-blue) 0%, var(--camus-purple) 100%);
-            color: white;
-        }
-        footer {
-            margin-top: 50px;
-            padding: 20px;
-            background-color: #333;
-            color: #f4f4f9;
-            text-align: center;
-        }
-        footer a {
-            color: #f4f4f9;
-            text-decoration: none;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="git-camus turns your staged Git diff into a philosophical commit message, powered by Ollama, OpenAI, Claude, or the Claude CLI — running entirely on your terms.">
+  <meta name="keywords" content="git, commit messages, albert camus, philosophy, ollama, openai, claude, cli, existentialism, absurdism">
+  <meta property="og:title" content="git-camus — Commit to the absurd">
+  <meta property="og:description" content="Transform your Git commit messages into philosophical reflections inspired by Albert Camus.">
+  <meta property="og:image" content="https://rachlenko.github.io/git-camus/images/git-camus_logo.jpeg">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#082533">
+  <link rel="icon" type="image/png" href="images/favicon-32.png">
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+  <title>git-camus — Commit to the absurd</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,500&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy-950: #060d12;
+      --navy-900: #082533;
+      --navy-800: #0f3245;
+      --navy-700: #17435a;
+      --cream: #fdf2bc;
+      --cream-dim: #d9cfa1;
+      --orange: #ef520b;
+      --orange-bright: #ff7a3d;
+      --ink: #1b1305;
+
+      --font-display: 'Newsreader', Georgia, serif;
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --font-mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+
+      --space-section: clamp(4rem, 3rem + 4vw, 7rem);
+      --measure: 42rem;
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: var(--navy-950);
+      color: var(--cream);
+      font-family: var(--font-body);
+      font-size: 1rem;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    ::selection { background: var(--orange); color: var(--ink); }
+
+    a { color: var(--orange-bright); }
+
+    .wrap {
+      max-width: 68rem;
+      margin: 0 auto;
+      padding-inline: clamp(1.25rem, 4vw, 2.5rem);
+    }
+
+    .measure { max-width: var(--measure); }
+
+    h1, h2, h3 {
+      font-family: var(--font-display);
+      font-weight: 600;
+      line-height: 1.08;
+      margin: 0 0 0.5em;
+      color: var(--cream);
+    }
+
+    h2 { font-size: clamp(1.75rem, 1.4rem + 1.6vw, 2.6rem); }
+    h3 { font-size: 1.25rem; font-weight: 500; }
+
+    p { color: var(--cream-dim); }
+
+    code, pre {
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+    }
+
+    code {
+      background: rgba(253, 242, 188, 0.08);
+      color: var(--cream);
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+    }
+
+    pre {
+      background: var(--navy-900);
+      border: 1px solid var(--navy-700);
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      color: var(--cream);
+      box-shadow: inset 0 1px 0 rgba(253, 242, 188, 0.04);
+    }
+    pre code { background: none; padding: 0; }
+    .comment { color: var(--cream-dim); opacity: 0.65; }
+
+    /* ---------- Nav ---------- */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(10px);
+      background: rgba(6, 13, 18, 0.82);
+      border-bottom: 1px solid rgba(253, 242, 188, 0.08);
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-block: 0.85rem;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--cream);
+      text-decoration: none;
+    }
+    .brand img {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      display: block;
+    }
+    .nav-links {
+      display: flex;
+      gap: clamp(1rem, 3vw, 2rem);
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      font-size: 0.92rem;
+    }
+    .nav-links a {
+      color: var(--cream-dim);
+      text-decoration: none;
+      transition: color 0.2s var(--ease-out-expo);
+    }
+    .nav-links a:hover,
+    .nav-links a:focus-visible { color: var(--orange-bright); }
+
+    /* ---------- Hero ---------- */
+    .hero {
+      position: relative;
+      padding-block: clamp(3.5rem, 6vw, 6.5rem) var(--space-section);
+      overflow: hidden;
+      isolation: isolate;
+    }
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: -20% -10% auto -10%;
+      height: 60%;
+      background: radial-gradient(60% 100% at 30% 0%, rgba(239, 82, 11, 0.28), transparent 70%);
+      z-index: -1;
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.1fr auto;
+      gap: clamp(2rem, 5vw, 4rem);
+      align-items: center;
+    }
+    .eyebrow {
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-size: 0.75rem;
+      color: var(--orange-bright);
+      margin-bottom: 1rem;
+      display: inline-block;
+    }
+    .hero h1 {
+      font-size: clamp(2.6rem, 2rem + 3.4vw, 4.6rem);
+      letter-spacing: -0.01em;
+    }
+    .hero h1 em {
+      font-style: italic;
+      color: var(--orange-bright);
+    }
+    .hero p.lede {
+      font-size: clamp(1.05rem, 1rem + 0.3vw, 1.2rem);
+      max-width: 36rem;
+    }
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.85rem;
+      margin-top: 2rem;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.4rem;
+      border-radius: 999px;
+      font-weight: 500;
+      font-size: 0.95rem;
+      text-decoration: none;
+      transition: transform 0.2s var(--ease-out-expo), box-shadow 0.2s var(--ease-out-expo), background 0.2s var(--ease-out-expo);
+      border: 1px solid transparent;
+    }
+    .btn-primary {
+      background: var(--orange);
+      color: var(--ink);
+      box-shadow: 0 8px 24px -8px rgba(239, 82, 11, 0.6);
+    }
+    .btn-primary:hover, .btn-primary:focus-visible {
+      background: var(--orange-bright);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px -8px rgba(239, 82, 11, 0.75);
+    }
+    .btn-ghost {
+      color: var(--cream);
+      border-color: rgba(253, 242, 188, 0.25);
+    }
+    .btn-ghost:hover, .btn-ghost:focus-visible {
+      border-color: var(--orange-bright);
+      color: var(--orange-bright);
+      transform: translateY(-2px);
+    }
+    .btn:focus-visible { outline: 2px solid var(--orange-bright); outline-offset: 3px; }
+
+    .hero-mark {
+      width: clamp(140px, 20vw, 220px);
+      aspect-ratio: 1;
+      border-radius: 26px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px -16px rgba(239, 82, 11, 0.45), 0 0 0 1px rgba(253, 242, 188, 0.08);
+      justify-self: end;
+    }
+    .hero-mark img { width: 100%; height: 100%; display: block; object-fit: cover; }
+
+    @media (max-width: 720px) {
+      .hero-grid { grid-template-columns: 1fr; }
+      .hero-mark { justify-self: start; width: 110px; order: -1; margin-bottom: 0.5rem; }
+    }
+
+    /* ---------- Section shell ---------- */
+    section { padding-block: var(--space-section); }
+    section + section { border-top: 1px solid rgba(253, 242, 188, 0.07); }
+    .section-head { margin-bottom: clamp(2rem, 4vw, 3rem); }
+    .kicker {
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 0.72rem;
+      color: var(--orange-bright);
+      display: block;
+      margin-bottom: 0.6rem;
+    }
+
+    /* ---------- Before / After ---------- */
+    .compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    .compare-col {
+      border-radius: 14px;
+      padding: 1.5rem;
+      border: 1px solid rgba(253, 242, 188, 0.1);
+    }
+    .compare-col.before { background: rgba(253, 242, 188, 0.03); }
+    .compare-col.after {
+      background: linear-gradient(160deg, rgba(239, 82, 11, 0.14), rgba(253, 242, 188, 0.03));
+      border-color: rgba(239, 82, 11, 0.35);
+    }
+    .compare-col h3 {
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.78rem;
+      font-weight: 500;
+    }
+    .compare-col.before h3 { color: var(--cream-dim); }
+    .compare-col.after h3 { color: var(--orange-bright); }
+    .compare-list { list-style: none; margin: 0; padding: 0; }
+    .compare-list li {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      padding-block: 0.7rem;
+      border-top: 1px dashed rgba(253, 242, 188, 0.12);
+      color: var(--cream-dim);
+    }
+    .compare-list li:first-child { border-top: none; }
+    .compare-col.after .compare-list li {
+      color: var(--cream);
+      font-style: italic;
+      font-family: var(--font-display);
+      font-size: 1rem;
+    }
+    @media (max-width: 640px) { .compare { grid-template-columns: 1fr; } }
+
+    /* ---------- Features ---------- */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: rgba(253, 242, 188, 0.08);
+      border: 1px solid rgba(253, 242, 188, 0.08);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .feature {
+      background: var(--navy-950);
+      padding: 1.75rem;
+      transition: background 0.25s var(--ease-out-expo);
+    }
+    .feature:hover { background: var(--navy-900); }
+    .feature svg {
+      width: 26px;
+      height: 26px;
+      stroke: var(--orange-bright);
+      fill: none;
+      stroke-width: 1.6;
+      margin-bottom: 0.9rem;
+    }
+    .feature h3 { margin-bottom: 0.35rem; }
+    .feature p { font-size: 0.92rem; margin: 0; }
+    @media (max-width: 860px) { .features { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 560px) { .features { grid-template-columns: 1fr; } }
+
+    /* ---------- Quick start ---------- */
+    .steps {
+      display: grid;
+      gap: 1.75rem;
+    }
+    .step {
+      display: grid;
+      grid-template-columns: 2.5rem 1fr;
+      gap: 1.1rem;
+    }
+    .step-num {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 999px;
+      background: rgba(239, 82, 11, 0.12);
+      border: 1px solid rgba(239, 82, 11, 0.4);
+      color: var(--orange-bright);
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .step h3 { margin-bottom: 0.5rem; }
+    .step p { margin: 0 0 0.75rem; font-size: 0.94rem; }
+
+    .provider-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem;
+      margin-top: 0.5rem;
+    }
+    .provider-card {
+      border: 1px solid rgba(253, 242, 188, 0.12);
+      border-radius: 10px;
+      padding: 0.9rem 1rem;
+      background: rgba(253, 242, 188, 0.03);
+    }
+    .provider-card .tag {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--orange-bright);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .provider-card p { font-size: 0.82rem; margin: 0.3rem 0 0; }
+    @media (max-width: 760px) { .provider-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 480px) { .provider-grid { grid-template-columns: 1fr; } }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+    }
+    th, td {
+      text-align: left;
+      padding: 0.65rem 0.8rem;
+      border-bottom: 1px solid rgba(253, 242, 188, 0.1);
+    }
+    th {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--orange-bright);
+      font-weight: 500;
+    }
+    td code { font-size: 0.82rem; }
+
+    /* ---------- Philosophy quote ---------- */
+    .quote-band {
+      text-align: center;
+      padding-block: var(--space-section);
+    }
+    .quote-band blockquote {
+      font-family: var(--font-display);
+      font-style: italic;
+      font-size: clamp(1.4rem, 1.1rem + 1.4vw, 2.1rem);
+      max-width: 40rem;
+      margin: 0 auto;
+      color: var(--cream);
+    }
+    .quote-band cite {
+      display: block;
+      margin-top: 1.1rem;
+      font-family: var(--font-mono);
+      font-style: normal;
+      font-size: 0.78rem;
+      color: var(--cream-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    /* ---------- Footer ---------- */
+    footer {
+      border-top: 1px solid rgba(253, 242, 188, 0.08);
+      padding-block: 2.5rem;
+    }
+    .footer-inner {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      font-size: 0.88rem;
+    }
+    .footer-links a { color: var(--cream-dim); text-decoration: none; }
+    .footer-links a:hover { color: var(--orange-bright); }
+    .footer-fine { font-size: 0.82rem; color: var(--cream-dim); opacity: 0.7; margin: 0; }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .btn, .feature { transition: none; }
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <div class="container">
-            <div class="logo-container">
-                <span style="font-size: 3rem;">⁂</span>
-                <h1>git-camus</h1>
+
+  <nav class="nav">
+    <div class="wrap nav-inner">
+      <a class="brand" href="#top">
+        <img src="images/favicon-32.png" alt="" width="30" height="30">
+        git-camus
+      </a>
+      <ul class="nav-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#quick-start">Quick Start</a></li>
+        <li><a href="#reference">Reference</a></li>
+        <li><a href="https://github.com/rachlenko/git-camus">GitHub</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <header class="hero" id="top">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="eyebrow">Git commit messages, reconsidered</span>
+        <h1>Commit to the <em>absurd</em>.</h1>
+        <p class="lede">git-camus reads your staged diff and writes a philosophical reflection on it — inspired by Albert Camus — using Ollama, OpenAI, Claude, or the Claude&nbsp;CLI, entirely on your own terms.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#quick-start">Get started</a>
+          <a class="btn btn-ghost" href="https://github.com/rachlenko/git-camus">View on GitHub →</a>
+        </div>
+      </div>
+      <div class="hero-mark">
+        <img src="images/git-camus_logo.jpeg" alt="git-camus logo: a silhouette smoking a cigarette against an orange sun" width="220" height="220">
+      </div>
+    </div>
+  </header>
+
+  <section aria-labelledby="compare-heading">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="kicker">The absurd, applied</span>
+        <h2 id="compare-heading">Every commit deserves a little existential dread.</h2>
+      </div>
+      <div class="compare">
+        <div class="compare-col before">
+          <h3>Without git-camus</h3>
+          <ul class="compare-list">
+            <li>fix bug</li>
+            <li>update stuff</li>
+            <li>add user validation</li>
+            <li>wip</li>
+          </ul>
+        </div>
+        <div class="compare-col after">
+          <h3>With git-camus</h3>
+          <ul class="compare-list">
+            <li>"The code compiles, but does it answer why we code at all?"</li>
+            <li>"In the face of authentication's absurdity, we persist with validation."</li>
+            <li>"Documentation: maps for navigating our digital Sisyphean task."</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" aria-labelledby="features-heading">
+    <div class="wrap">
+      <div class="section-head measure">
+        <span class="kicker">Why git-camus</span>
+        <h2 id="features-heading">Built for privacy, tuned for meaning.</h2>
+      </div>
+      <div class="features">
+        <div class="feature">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 12h8M12 8v8"/></svg>
+          <h3>Local-first by default</h3>
+          <p>Runs on Ollama out of the box — no data leaves your machine unless you choose a hosted provider.</p>
+        </div>
+        <div class="feature">
+          <svg viewBox="0 0 24 24"><path d="M12 3l7 4v5c0 5-3.4 7.4-7 9-3.6-1.6-7-4-7-9V7z"/></svg>
+          <h3>Privacy first</h3>
+          <p>Nothing is logged or sent to third parties beyond the LLM provider you explicitly select.</p>
+        </div>
+        <div class="feature">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          <h3>Fast &amp; lightweight</h3>
+          <p>A single Python CLI with minimal dependencies — install it and it's ready in seconds.</p>
+        </div>
+        <div class="feature">
+          <svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h10M4 19h13"/></svg>
+          <h3>Four providers, one command</h3>
+          <p>Switch between Ollama, OpenAI, Claude, or the local Claude CLI with a single flag.</p>
+        </div>
+        <div class="feature">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8"/></svg>
+          <h3>Contextual</h3>
+          <p>Reads your actual staged diff, so every reflection is grounded in the change you made.</p>
+        </div>
+        <div class="feature">
+          <svg viewBox="0 0 24 24"><path d="M4 21v-6M4 9V3M12 21v-10M12 7V3M20 21v-4M20 13V3"/><circle cx="4" cy="12" r="2"/><circle cx="12" cy="9" r="2"/><circle cx="20" cy="15" r="2"/></svg>
+          <h3>Configurable</h3>
+          <p>Pick your model, prompt, and provider per project via environment variables or a config file.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="quick-start" aria-labelledby="quickstart-heading">
+    <div class="wrap">
+      <div class="section-head measure">
+        <span class="kicker">Quick start</span>
+        <h2 id="quickstart-heading">From <code>pip install</code> to your first reflection.</h2>
+      </div>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div>
+            <h3>Install</h3>
+            <p>Requires Python 3.9+. Install the latest release from PyPI, or pin a version.</p>
+            <pre><code>pip install git-camus
+<span class="comment"># or a specific version</span>
+pip install git-camus==0.5.0</code></pre>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">2</div>
+          <div>
+            <h3>Stage your changes and run it</h3>
+            <p>git-camus reads what's staged and writes the message for you.</p>
+            <pre><code>git add .
+git-camus
+
+<span class="comment"># preview without committing</span>
+git-camus --show
+
+<span class="comment"># steer the reflection with context</span>
+git-camus -m "fixed auth token expiry"</code></pre>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">3</div>
+          <div>
+            <h3>Choose a provider</h3>
+            <p>Ollama runs fully local by default. Switch providers with <code>--provider</code> / <code>-p</code>, or set <code>GIT_CAMUS_PROVIDER</code>.</p>
+            <div class="provider-grid">
+              <div class="provider-card">
+                <span class="tag">Ollama · default</span>
+                <p>Local model via <code>OLLAMA_HOST</code>. No key required.</p>
+              </div>
+              <div class="provider-card">
+                <span class="tag">OpenAI</span>
+                <p>Set <code>OPENAI_API_KEY</code>, run with <code>-p openai</code>.</p>
+              </div>
+              <div class="provider-card">
+                <span class="tag">Claude</span>
+                <p>Set <code>ANTHROPIC_API_KEY</code>, run with <code>-p claude</code>.</p>
+              </div>
+              <div class="provider-card">
+                <span class="tag">Claude CLI</span>
+                <p>Uses your local <code>claude</code> login — no API key needed.</p>
+              </div>
             </div>
+            <pre style="margin-top: 1rem;"><code><span class="comment"># Use OpenAI</span>
+export OPENAI_API_KEY="sk-..."
+git-camus --provider openai
+
+<span class="comment"># Use the Claude CLI (no API key needed)</span>
+git-camus --provider claude-cli</code></pre>
+          </div>
         </div>
-    </header>
+      </div>
+    </div>
+  </section>
 
-    <section class="hero">
-        <div class="logo-container">
-            <img src="docs/images/git-camus_logo.jpeg" alt="Git-Camus">
-            <h1>git-camus</h1>
-            <p>Transform your Git commit messages into philosophical reflections inspired by the works of Albert Camus.</p>
-        </div>
-    
+  <section id="reference" aria-labelledby="reference-heading">
+    <div class="wrap">
+      <div class="section-head measure">
+        <span class="kicker">Reference</span>
+        <h2 id="reference-heading">Command-line options</h2>
+      </div>
+      <table>
+        <thead>
+          <tr><th>Flag</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>--show</code>, <code>-s</code></td><td>Preview the generated message without committing</td></tr>
+          <tr><td><code>--message</code>, <code>-m</code></td><td>Provide context to guide the philosophical reflection</td></tr>
+          <tr><td><code>--provider</code>, <code>-p</code></td><td><code>ollama</code> (default), <code>openai</code>, <code>claude</code>, or <code>claude-cli</code></td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top: 2rem;">Want an isolated install with its own virtualenv and wrapper binary? See the <a href="https://github.com/rachlenko/git-camus#standalone-install-isolated-virtualenv--wrapper-binary">standalone install</a> instructions, or read the full <a href="https://github.com/rachlenko/git-camus#readme">README</a> for configuration reference.</p>
+    </div>
+  </section>
 
-        <div class="container">
-        <p>Welcome to <strong>Git-Camus</strong>, the utility that transforms your Git commit messages into philosophical reflections inspired by the works of Albert Camus. Why settle for mundane commit messages when you can make each one a profound meditation on absurdity, rebellion, and the human condition?</p>
+  <section class="quote-band">
+    <div class="wrap">
+      <blockquote>"One must imagine Sisyphus committing code."</blockquote>
+      <cite>— Albert Camus (probably)</cite>
+    </div>
+  </section>
 
-        <p>With <strong>Git-Camus</strong>, the simple act of version control becomes an opportunity to reflect on life's paradoxes, turning every push, pull, and merge into a philosophical journey.</p>
+  <footer>
+    <div class="wrap footer-inner">
+      <p class="footer-fine">© 2024–2026 git-camus · Released under the MIT License</p>
+      <ul class="footer-links">
+        <li><a href="https://github.com/rachlenko/git-camus">GitHub</a></li>
+        <li><a href="https://github.com/rachlenko/git-camus/issues">Issues</a></li>
+        <li><a href="https://github.com/rachlenko/git-camus/discussions">Discussions</a></li>
+        <li><a href="https://github.com/rachlenko/git-camus#readme">README</a></li>
+      </ul>
+    </div>
+  </footer>
 
-        <p>Here's how it works:</p>
-        <code>git_camus -m "Initial commit" </code>
-
-        <p>Instead of a bland commit message, you'll get something like:</p>
-        <code>"The code compiles, but does it solve the eternal question of why we code at all?"</code>
-
-        <p>Whether you're exploring the absurdity of debugging or the rebellion against technical debt, <strong>Git-Camus</strong> brings meaning to your workflow. Now, each commit is not just a record of changes, but a mark of your existential exploration.</p>
-
-        <button class="cta" onclick="window.location.href='https://github.com/your-repo/git-camus';">Get Started on GitHub</button>
-        </div>
-    </section>
-
-    <section class="container">
-        <h2>Quick Start</h2>
-        <h3>Install git-camus</h3>
-        <pre><code>pip install git-camus</code></pre>
-        <h3>Configure Model and Prompt</h3>
-        <p>Create a <code>config.toml</code> file in your project or home directory:</p>
-        <pre><code>[run]
-model_name = "llama3:70b"
-prompt_message = "You are an AI assistant... (customize your prompt here)"
-</code></pre>
-        <h3>Run Locally</h3>
-        <pre><code>git-camus</code></pre>
-        <h3>Run with Docker</h3>
-        <pre><code># Build the Docker image
- docker build -t git-camus .
-
-# Run with default settings
- docker run --rm -v $(pwd):/app git-camus
-
-# Run with a custom config file
- docker run --rm -v $(pwd):/app -v $(pwd)/config.toml:/app/config.toml git-camus
-
-# Override the model via environment variable
- docker run --rm -v $(pwd):/app -e OLLAMA_MODEL=llama3:8b git-camus
-</code></pre>
-        <p>For more details, see the <a href="https://github.com/your-repo/git-camus">README</a>.</p>
-    </section>
-
-    <footer>
-        <p>© 2024 Git-Camus. Inspired by Albert Camus, developed for curious developers.</p>
-        <p><a href="https://github.com/your-repo/git-camus">Visit Git-Camus on GitHub</a></p>
-    </footer>
 </body>
 </html>
