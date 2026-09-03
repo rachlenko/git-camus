@@ -26,7 +26,7 @@ pydantic_core==2.48.0
 Pygments==2.19.2
 pyproject_hooks==1.2.0
 pytest==9.1.1
-pytest-cov==6.2.1
+pytest-cov==7.1.0
 pytest-xdist==3.8.0
 PyYAML==6.0.2
 rich==13.9.4
