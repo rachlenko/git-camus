@@ -8,5 +8,5 @@ pytest-xdist>=3.0.0
 pytest-mock>=3.10.0
 
 # Security testing
-bandit[toml]>=1.7.0
+bandit[toml]>=1.9.4
 safety>=2.0.0
