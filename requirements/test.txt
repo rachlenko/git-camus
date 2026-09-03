@@ -9,4 +9,4 @@ pytest-mock>=3.10.0
 
 # Security testing
 bandit[toml]>=1.7.0
-safety>=2.0.0
+safety>=3.8.1
