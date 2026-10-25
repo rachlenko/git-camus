@@ -2,7 +2,7 @@ annotated-types==0.7.0
 anyio==4.14.2
 black==26.5.1
 build==1.2.2.post1
-certifi==2025.7.14
+certifi==2026.10.19
 click==8.2.1
 coverage==7.10.1
 execnet==2.1.1
